@@ -7,7 +7,6 @@ import {
   type AuditEntry,
   type CaseStatus,
 } from "@/lib/cases-extras";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -18,90 +17,27 @@ interface BreakdownSegment {
   color: string;
 }
 
-function BreakdownCard({
-  title,
-  caption,
-  segments,
-}: {
-  title: string;
-  caption?: string;
-  segments: BreakdownSegment[];
-}) {
-  const total = segments.reduce((s, x) => s + x.count, 0);
-  return (
-    <Card className="rounded-3xl border-border bg-surface shadow-sm transition-all duration-200">
-      <CardHeader className="space-y-1 p-3 pb-2">
-        <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {title}
-        </CardTitle>
-        {caption && (
-          <CardDescription className="text-[11px] leading-snug">{caption}</CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="space-y-2.5 p-3 pt-0">
-        <div className="flex h-2 w-full overflow-hidden rounded-full bg-secondary">
-          {segments.map((s) => (
-            <div
-              key={s.label}
-              className="animate-bar-grow h-full transition-[width] duration-700 ease-out"
-              style={{
-                width: `${(s.count / total) * 100}%`,
-                backgroundColor: s.color,
-              }}
-              title={`${s.label}: ${s.count}`}
-            />
-          ))}
-        </div>
-        <ul className="space-y-1">
-          {segments.map((s) => {
-            const pct = ((s.count / total) * 100).toFixed(1);
-            return (
-              <li key={s.label} className="flex items-center gap-2 text-xs">
-                <span
-                  className="inline-block h-3 w-[3px] rounded-sm"
-                  style={{ backgroundColor: s.color }}
-                />
-                <span className="num font-semibold text-foreground tabular-nums">{pct}%</span>
-                <span className="ml-auto text-muted-foreground">
-                  <span className="num font-semibold text-foreground">{s.count}</span>
-                  <span className="mx-1">·</span>
-                  {s.label}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-      </CardContent>
-    </Card>
-  );
-}
-
-function SeverityBreakdownCard() {
-  return (
-    <BreakdownCard
-      title="Severity Breakdown"
-      segments={[
-        { label: "Critical", count: 4, color: "var(--severity-critical)" },
-        { label: "High", count: 9, color: "var(--severity-high)" },
-        { label: "Review", count: 10, color: "var(--source-slate)" },
-      ]}
-    />
-  );
-}
-
 const SEVERITY_SEGMENTS: BreakdownSegment[] = [
   { label: "Critical", count: 4, color: "var(--severity-critical)" },
   { label: "High", count: 9, color: "var(--severity-high)" },
-  { label: "Review", count: 10, color: "var(--source-slate)" },
+  { label: "Review", count: 10, color: "var(--severity-review)" },
 ];
+
+const SOURCE_SEGMENTS: BreakdownSegment[] = [
+  { label: "Circular flows", count: 6, color: "#1E3A5F" },
+  { label: "Structuring", count: 11, color: "#5B6472" },
+  { label: "Duplicate transactions", count: 6, color: "#B07D2B" },
+];
+
+const LABEL = "text-[11px] uppercase tracking-[0.06em] font-medium text-muted-foreground";
 
 function SeverityBreakdownCollapsed() {
   const total = SEVERITY_SEGMENTS.reduce((s, x) => s + x.count, 0);
   const critical = SEVERITY_SEGMENTS[0].count;
   return (
-    <Collapsible className="rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
-      <CollapsibleTrigger className="group flex w-full items-center gap-3 p-3 text-left">
-        <div className="flex h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+    <Collapsible className="rounded-md border border-border bg-surface shadow-card">
+      <CollapsibleTrigger className="group flex w-full items-center gap-3 p-4 text-left">
+        <div className="flex h-1.5 flex-1 overflow-hidden rounded-full bg-border">
           {SEVERITY_SEGMENTS.map((s) => (
             <div
               key={s.label}
@@ -110,27 +46,24 @@ function SeverityBreakdownCollapsed() {
             />
           ))}
         </div>
-        <span className="shrink-0 text-xs text-muted-foreground">
-          <Mono className="font-semibold text-foreground">{total}</Mono> findings ·{" "}
-          <Mono className="font-semibold text-foreground">{critical}</Mono> critical
+        <span className="shrink-0 text-[13px] text-muted-foreground">
+          <Mono className="text-ink">{total}</Mono> findings ·{" "}
+          <Mono className="text-ink">{critical}</Mono> critical
         </span>
-        <span className="shrink-0 text-xs text-muted-foreground transition-transform group-data-[state=open]:rotate-90">
+        <span className="shrink-0 text-[11px] text-muted-foreground transition-transform group-data-[state=open]:rotate-90">
           ▸
         </span>
       </CollapsibleTrigger>
-      <CollapsibleContent className="px-3 pb-3">
-        <ul className="space-y-1">
+      <CollapsibleContent className="border-t border-border px-4 py-3">
+        <ul className="space-y-1.5">
           {SEVERITY_SEGMENTS.map((s) => {
             const pct = ((s.count / total) * 100).toFixed(1);
             return (
-              <li key={s.label} className="flex items-center gap-2 text-xs">
-                <span
-                  className="inline-block h-3 w-[3px] rounded-sm"
-                  style={{ backgroundColor: s.color }}
-                />
-                <span className="num font-semibold text-foreground tabular-nums">{pct}%</span>
+              <li key={s.label} className="flex items-center gap-2 text-[13px]">
+                <span className="inline-block h-2.5 w-[3px]" style={{ backgroundColor: s.color }} />
+                <Mono className="text-ink">{pct}%</Mono>
                 <span className="ml-auto text-muted-foreground">
-                  <span className="num font-semibold text-foreground">{s.count}</span>
+                  <Mono className="text-ink">{s.count}</Mono>
                   <span className="mx-1">·</span>
                   {s.label}
                 </span>
@@ -145,16 +78,39 @@ function SeverityBreakdownCollapsed() {
 
 
 function FindingsBySourceCard() {
+  const total = SOURCE_SEGMENTS.reduce((s, x) => s + x.count, 0);
   return (
-    <BreakdownCard
-      title="Findings by Source"
-      caption="Detected by Finder across 3 rule sets"
-      segments={[
-        { label: "Circular flows", count: 6, color: "var(--source-blue)" },
-        { label: "Structuring", count: 11, color: "var(--source-teal)" },
-        { label: "Duplicate transactions", count: 6, color: "var(--source-slate)" },
-      ]}
-    />
+    <div className="rounded-md border border-border bg-surface p-5 shadow-card">
+      <p className={LABEL}>Findings by source</p>
+      <p className="mt-1 text-[13px] text-muted-foreground">
+        Detected by Finder across 3 rule sets
+      </p>
+      <div className="mt-3 flex h-1.5 w-full overflow-hidden rounded-full bg-border">
+        {SOURCE_SEGMENTS.map((s) => (
+          <div
+            key={s.label}
+            style={{ width: `${(s.count / total) * 100}%`, backgroundColor: s.color }}
+            className="h-full"
+          />
+        ))}
+      </div>
+      <ul className="mt-3 space-y-1.5">
+        {SOURCE_SEGMENTS.map((s) => {
+          const pct = ((s.count / total) * 100).toFixed(1);
+          return (
+            <li key={s.label} className="flex items-center gap-2 text-[13px]">
+              <span className="inline-block h-2.5 w-[3px]" style={{ backgroundColor: s.color }} />
+              <Mono className="text-ink">{pct}%</Mono>
+              <span className="ml-auto text-muted-foreground">
+                <Mono className="text-ink">{s.count}</Mono>
+                <span className="mx-1">·</span>
+                {s.label}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -162,19 +118,12 @@ function FindingsBySourceCard() {
 const formatExposure = (n: number) =>
   n >= 1000 ? `$${(n / 1000).toFixed(1)}K` : `$${n}`;
 
-const formatAmount = (n: number) =>
-  `$${n.toLocaleString("en-US")}`;
+const formatAmount = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 const severityStyles: Record<Severity, string> = {
-  CRITICAL: "bg-severity-critical-bg text-severity-critical",
-  HIGH: "bg-severity-high-bg text-severity-high",
-  REVIEW: "bg-severity-review-bg text-severity-review",
-};
-
-const severityBar: Record<Severity, string> = {
-  CRITICAL: "bg-severity-critical",
-  HIGH: "bg-severity-high",
-  REVIEW: "bg-severity-review",
+  CRITICAL: "bg-[#FBEAE6] text-[#C8503C]",
+  HIGH: "bg-[#F8F0DF] text-[#B07D2B]",
+  REVIEW: "bg-[#EEEFF1] text-[#5B6472]",
 };
 
 const statusStampColor: Record<CaseStatus, { fg: string; bg: string }> = {
@@ -185,7 +134,7 @@ const statusStampColor: Record<CaseStatus, { fg: string; bg: string }> = {
 };
 
 const riskColor = (n: number) =>
-  n >= 80 ? "text-severity-critical" : n >= 50 ? "text-severity-high" : "text-severity-review";
+  n >= 80 ? "text-[#C8503C]" : n >= 50 ? "text-[#B07D2B]" : "text-[#5B6472]";
 
 type RecKey = "escalate" | "flag" | "dismiss";
 const recommendedKey = (rec: string): RecKey => {
@@ -200,21 +149,12 @@ function Mono({ children, className = "" }: { children: React.ReactNode; classNa
   return <span className={`num ${className}`}>{children}</span>;
 }
 
-function StatusStamp({ status, size = "md" }: { status: CaseStatus; size?: "sm" | "md" }) {
+function StatusStamp({ status }: { status: CaseStatus }) {
   const c = statusStampColor[status];
-  const dims =
-    size === "sm"
-      ? "px-2 py-0.5 text-[9.5px] tracking-[0.18em]"
-      : "px-2.5 py-1 text-[11px] tracking-[0.2em]";
   return (
     <span
-      className={`inline-flex select-none items-center rounded-full border border-dashed font-semibold uppercase transition-all duration-200 ${dims}`}
-      style={{
-        color: c.fg,
-        backgroundColor: c.bg,
-        borderColor: c.fg,
-        transform: "rotate(-2deg)",
-      }}
+      className="inline-flex select-none items-center rounded-sm border border-dashed px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.08em]"
+      style={{ color: c.fg, backgroundColor: c.bg, borderColor: c.fg }}
     >
       {status}
     </span>
@@ -224,7 +164,7 @@ function StatusStamp({ status, size = "md" }: { status: CaseStatus; size?: "sm" 
 function SeverityBadge({ s }: { s: Severity }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wider transition-all duration-200 ${severityStyles[s]}`}
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.04em] ${severityStyles[s]}`}
     >
       {s}
     </span>
@@ -232,20 +172,11 @@ function SeverityBadge({ s }: { s: Severity }) {
 }
 
 
-function StatChip({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="flex flex-col rounded-3xl border border-border bg-surface px-4 py-2.5 shadow-sm transition-all duration-200">
-      <Mono className="text-3xl font-bold tracking-tight text-foreground leading-none">{value}</Mono>
-      <span className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">{label}</span>
-    </div>
-  );
-}
-
 function HeaderStatChip({ value, label }: { value: string; label: string }) {
   return (
-    <div className="flex flex-col px-3 leading-none">
-      <Mono className="text-2xl font-bold tracking-tight text-white leading-none">{value}</Mono>
-      <span className="mt-1 text-[11px] uppercase tracking-wider text-white/60">{label}</span>
+    <div className="flex flex-col rounded-md border border-border bg-surface px-4 py-2.5 shadow-card">
+      <Mono className="text-[20px] font-semibold leading-none text-ink">{value}</Mono>
+      <span className={`mt-1.5 ${LABEL}`}>{label}</span>
     </div>
   );
 }
@@ -255,15 +186,14 @@ function SlaChip({ hours }: { hours: number }) {
   const urgent = hours < 24;
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] transition-all duration-200 ${
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.04em] ${
         urgent
-          ? "border-severity-critical/30 bg-severity-critical-bg text-severity-critical"
-          : "border-border bg-secondary text-muted-foreground"
+          ? "bg-[#FBEAE6] text-[#C8503C]"
+          : "bg-[#EEEFF1] text-[#5B6472]"
       }`}
     >
-      <span>⏱</span>
-      <Mono className="font-semibold">{hours}h</Mono>
-      <span>to regulatory deadline</span>
+      <Mono>{hours}h</Mono>
+      <span className="normal-case tracking-normal">SLA</span>
     </span>
   );
 }
@@ -282,65 +212,40 @@ function CaseCard({
   return (
     <button
       onClick={onClick}
-      className={`relative w-full overflow-hidden rounded-3xl border bg-surface p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
+      className={`relative w-full overflow-hidden rounded-md border bg-surface p-5 text-left shadow-card transition-colors ${
         active
-          ? "border-border before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary before:content-['']"
-          : "border-border hover:border-foreground/20"
+          ? "border-border border-l-2 border-l-primary bg-[#F4F6F9]"
+          : "border-border hover:bg-[#FAFAF8]"
       }`}
     >
-      <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]} ${active ? "opacity-0" : ""}`} />
-
-      {extras && (
-        <span className="absolute right-3 top-3">
-          <span
-            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] ${
-              extras.sla_hours < 24
-                ? "border-severity-critical/30 bg-severity-critical-bg text-severity-critical"
-                : "border-border bg-secondary text-muted-foreground"
-            }`}
-          >
-            <Mono className="font-semibold">{extras.sla_hours}h</Mono>
-          </span>
-        </span>
-      )}
-      <div className="flex flex-col gap-2 pl-2 pr-12">
-        <div className="flex items-center justify-between gap-3">
-          <Mono className="text-sm text-muted-foreground">{c.account_id}</Mono>
-          <Mono className={`text-xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
-            {c.fraud_prob}
-          </Mono>
-        </div>
-        <div className="flex items-center justify-between gap-3">
-          <Mono className="text-2xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
-          <SeverityBadge s={c.severity} />
-        </div>
-        <p className="line-clamp-1 text-base leading-snug text-foreground/85">{c.reason}</p>
+      <div className="flex items-start justify-between gap-3">
+        <SeverityBadge s={c.severity} />
+        <Mono className="text-[13px] text-muted-foreground">{c.account_id}</Mono>
       </div>
+      <div className="mt-3 flex items-baseline justify-between gap-3">
+        <Mono className="text-base font-semibold text-ink">{formatExposure(c.exposure)}</Mono>
+        {extras && <SlaChip hours={extras.sla_hours} />}
+      </div>
+      <p className="mt-2 line-clamp-1 text-[13px] text-muted-foreground">{c.reason}</p>
     </button>
   );
 }
 
 
-
-
 function FraudBar({ prob, ci }: { prob: number; ci: [number, number] }) {
   return (
     <div>
-      <div className="flex items-baseline justify-between text-sm">
-        <span className="font-medium text-foreground">Fraud likelihood</span>
+      <div className="flex items-baseline justify-between text-[13px]">
+        <span className={LABEL}>Fraud likelihood</span>
         <span>
-          <Mono className="text-2xl font-semibold text-foreground">{prob}%</Mono>
+          <Mono className="text-ink">{prob}%</Mono>
           <span className="ml-2 text-muted-foreground">
-            [<Mono>{ci[0]}–{ci[1]}%</Mono> confidence]
+            [<Mono>{ci[0]}–{ci[1]}%</Mono>]
           </span>
         </span>
       </div>
-      <div className="relative mt-2 h-2.5 w-full overflow-hidden rounded-full bg-secondary">
-        <div
-          className="absolute top-0 h-full bg-primary/15"
-          style={{ left: `${ci[0]}%`, width: `${ci[1] - ci[0]}%` }}
-        />
-        <div className="absolute top-0 h-full bg-primary" style={{ width: `${prob}%` }} />
+      <div className="relative mt-2 h-1.5 w-full overflow-hidden rounded-full bg-border">
+        <div className="absolute top-0 h-full bg-primary rounded-full" style={{ width: `${prob}%` }} />
       </div>
     </div>
   );
@@ -350,38 +255,30 @@ function RulesRow({ c }: { c: Case }) {
   const extras = CASE_EXTRAS[c.id];
   if (!extras) return null;
   return (
-    <section>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Rules
-      </h3>
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Triggered:
+    <section className="space-y-3">
+      <p className={LABEL}>Rules</p>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`${LABEL}`}>Triggered</span>
+        {extras.triggered_rules.map((r) => (
+          <span
+            key={r}
+            className="inline-flex items-center rounded-full bg-[#FBEAE6] px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.04em] text-[#C8503C]"
+          >
+            <Mono>{r}</Mono>
           </span>
-          {extras.triggered_rules.map((r) => (
-            <span
-              key={r}
-              className="inline-flex items-center rounded-full bg-severity-critical-bg px-2.5 py-0.5 text-xs font-semibold text-severity-critical transition-all duration-200"
-            >
-              <Mono>{r}</Mono>
-            </span>
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Evaded:
+        ))}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`${LABEL}`}>Evaded</span>
+        {extras.evaded_rules.map((r) => (
+          <span
+            key={r.code}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2 py-0.5 text-[11px] text-ink"
+          >
+            <Mono className="font-medium">{r.code}</Mono>
+            {r.note && <span className="text-muted-foreground normal-case">({r.note})</span>}
           </span>
-          {extras.evaded_rules.map((r) => (
-            <span
-              key={r.code}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-transparent px-2.5 py-0.5 text-xs text-foreground/80 transition-all duration-200"
-            >
-              <Mono className="font-semibold">{r.code}</Mono>
-              {r.note && <span className="text-muted-foreground">({r.note})</span>}
-            </span>
-          ))}
-        </div>
+        ))}
       </div>
     </section>
   );
@@ -394,23 +291,21 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
   const nodes = extras.flow;
   return (
     <section>
-      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Money flow timeline
-      </h3>
-      <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
+      <p className={`${LABEL} mb-3`}>Money flow timeline</p>
+      <div className="overflow-hidden rounded-md border border-border bg-surface shadow-card">
         <div className="relative px-4 pb-12 pt-5">
           <div className="flex items-center gap-1 overflow-x-auto pb-1">
             {nodes.map((n, i) => (
               <div key={i} className="flex shrink-0 items-center gap-1">
-                <div className="inline-flex items-center rounded-md border border-border bg-secondary px-2.5 py-1.5">
-                  <Mono className="text-xs font-semibold text-foreground">{n.account}</Mono>
+                <div className="inline-flex items-center rounded-md border border-border bg-[#FAFAF8] px-2.5 py-1.5">
+                  <Mono className="text-[13px] text-ink">{n.account}</Mono>
                 </div>
                 {i < nodes.length - 1 && (
                   <div className="flex shrink-0 flex-col items-center px-1 text-center">
-                    <Mono className="text-[11px] font-semibold leading-tight text-foreground">
+                    <Mono className="text-[11px] leading-tight text-ink">
                       {nodes[i + 1].amount != null ? formatAmount(nodes[i + 1].amount!) : ""}
                     </Mono>
-                    <span className="text-[10px] leading-tight text-muted-foreground">
+                    <span className="text-[11px] leading-tight text-muted-foreground">
                       <Mono>{nodes[i + 1].date ?? ""}</Mono>
                     </span>
                     <span className="-mt-0.5 text-base leading-none text-muted-foreground">→</span>
@@ -420,20 +315,19 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
             ))}
           </div>
 
-          {/* Curved return path */}
           <div
             aria-hidden
-            className="pointer-events-none absolute left-6 right-6 bottom-3 h-8 rounded-b-[999px] border-x-2 border-b-2 border-severity-critical/50"
+            className="pointer-events-none absolute left-6 right-6 bottom-3 h-8 rounded-b-[999px] border-x border-b border-[#C8503C]"
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-1 flex justify-center">
-            <span className="rounded-sm bg-surface px-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-severity-critical">
-              ↺ Circular Flow Detected
+            <span className="bg-surface px-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[#C8503C]">
+              ↺ Circular flow detected
             </span>
           </div>
         </div>
-        <div className="border-t border-border px-3 py-2 text-xs text-muted-foreground">
-          <Mono>{nodes.length}</Mono> hops · return-to-origin within{" "}
-          <Mono>{Math.max(1, nodes.length - 1) * 24}h</Mono> window
+        <div className="border-t border-border px-4 py-2 text-[13px] text-muted-foreground">
+          <Mono className="text-ink">{nodes.length}</Mono> hops · return-to-origin within{" "}
+          <Mono className="text-ink">{Math.max(1, nodes.length - 1) * 24}h</Mono> window
         </div>
       </div>
     </section>
@@ -442,17 +336,16 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
 
 function AuditLogList({ entries }: { entries: AuditEntry[] }) {
   return (
-    <ol className="max-h-[60vh] overflow-y-auto">
+    <ol className="max-h-[60vh] divide-y divide-border overflow-y-auto">
       {entries.map((e, i) => (
-        <li key={i} className="flex gap-3 py-1 text-xs leading-relaxed">
+        <li key={i} className="flex gap-3 py-2 text-[13px] leading-relaxed">
           <Mono className="shrink-0 text-muted-foreground">{e.time}</Mono>
-          <span className="text-foreground/85">{e.text}</span>
+          <span className="text-ink">{e.text}</span>
         </li>
       ))}
     </ol>
   );
 }
-
 
 
 const nowStamp = () => {
@@ -463,7 +356,7 @@ const nowStamp = () => {
 
 const recLabel: Record<RecKey, string> = {
   escalate: "Escalate",
-  flag: "Flag for Review",
+  flag: "Flag for review",
   dismiss: "Dismiss",
 };
 
@@ -472,7 +365,6 @@ function CaseDetail({ c }: { c: Case }) {
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [caseStatus, setCaseStatus] = useState<CaseStatus | undefined>(extras?.case_status);
 
-  // Reset audit log + status when switching cases.
   useEffect(() => {
     setAudit([...(extras?.audit_seed ?? [])].reverse());
     setCaseStatus(extras?.case_status);
@@ -497,60 +389,59 @@ function CaseDetail({ c }: { c: Case }) {
     append(`Analyst downloaded full case report for ${c.account_id} (PDF) — audit log included`);
 
   const recKey = recommendedKey(c.recommended_action);
-  const rec = (k: RecKey) => (recKey === k ? "ring-2 ring-primary/40" : "");
+  const recRing = (k: RecKey) => (recKey === k ? "ring-1 ring-primary/40" : "");
 
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto">
       {/* 1. Identity + Risk */}
       <section className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <Mono className="text-xl font-bold text-foreground">{c.account_id}</Mono>
+          <Mono className="text-base text-ink">{c.account_id}</Mono>
           {caseStatus && <StatusStamp status={caseStatus} />}
         </div>
         <div className="flex flex-wrap items-baseline gap-x-3">
-          <Mono className={`text-5xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
+          <Mono className={`text-5xl font-medium leading-none tracking-tight ${riskColor(c.fraud_prob)}`}>
             RISK {c.fraud_prob}
           </Mono>
-          <span className="text-xl text-muted-foreground">/100</span>
+          <span className="text-base text-muted-foreground">/100</span>
         </div>
-        <div className="text-sm text-muted-foreground">
-          <Mono>{c.fraud_ci[0]}–{c.fraud_ci[1]}%</Mono> confidence
+        <div className="text-[13px] text-muted-foreground">
+          <Mono className="text-ink">{c.fraud_ci[0]}–{c.fraud_ci[1]}%</Mono> confidence
         </div>
+        <FraudBar prob={c.fraud_prob} ci={c.fraud_ci} />
       </section>
 
-      {/* 2. Recommendation card — decision zone */}
-      <section className="rounded-3xl border border-border bg-[color:var(--color-blush)] p-6 text-ink shadow-sm transition-all duration-200">
-        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Recommended next step
-        </p>
-        <p className="mb-4 text-sm text-ink/85">
+      {/* 2. Recommendation card */}
+      <section className="rounded-md border border-border bg-surface p-5 shadow-card">
+        <p className={LABEL}>Recommended next step</p>
+        <p className="mt-2 text-[15px]">
           <span className="font-semibold text-ink">{recLabel[recKey]}</span>
           <span className="text-muted-foreground"> — {c.action_reason}</span>
         </p>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <button
             onClick={onEscalate}
-            className={`rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md ${rec("escalate")}`}
+            className={`rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-primary-hover ${recRing("escalate")}`}
           >
             Escalate
           </button>
           <button
             onClick={onFlag}
-            className={`rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md ${rec("flag")}`}
+            className={`rounded-md border border-border bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-colors hover:bg-secondary ${recRing("flag")}`}
           >
             Flag for review
           </button>
           <button
             onClick={onDismiss}
-            className={`rounded-full px-5 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground ${rec("dismiss")}`}
+            className={`rounded-md border border-border bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-colors hover:bg-secondary ${recRing("dismiss")}`}
           >
             Dismiss
           </button>
           <div className="ml-auto flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground">Report ready to download</span>
+            <span className="text-[13px] text-muted-foreground">Report ready</span>
             <button
               onClick={onDownload}
-              className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
+              className="rounded-md border border-border bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-colors hover:bg-secondary"
             >
               Download report
             </button>
@@ -560,32 +451,44 @@ function CaseDetail({ c }: { c: Case }) {
 
       {/* 3. Tabs */}
       <Tabs defaultValue="evidence" className="w-full">
-        <TabsList className="rounded-full bg-secondary p-1">
-          <TabsTrigger value="evidence" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Evidence</TabsTrigger>
-          <TabsTrigger value="flow" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Money flow</TabsTrigger>
-          <TabsTrigger value="audit" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Audit log</TabsTrigger>
+        <TabsList className="rounded-md bg-secondary p-0.5">
+          <TabsTrigger
+            value="evidence"
+            className="rounded-sm px-3 py-1 text-[13px] data-[state=active]:bg-white data-[state=active]:text-ink data-[state=active]:shadow-card"
+          >
+            Evidence
+          </TabsTrigger>
+          <TabsTrigger
+            value="flow"
+            className="rounded-sm px-3 py-1 text-[13px] data-[state=active]:bg-white data-[state=active]:text-ink data-[state=active]:shadow-card"
+          >
+            Money flow
+          </TabsTrigger>
+          <TabsTrigger
+            value="audit"
+            className="rounded-sm px-3 py-1 text-[13px] data-[state=active]:bg-white data-[state=active]:text-ink data-[state=active]:shadow-card"
+          >
+            Audit log
+          </TabsTrigger>
         </TabsList>
-
 
         <TabsContent value="evidence" className="flex flex-col gap-5 pt-4">
           <RulesRow c={c} />
           <section>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Exhibit List
-            </h3>
-            <ol className="space-y-1">
+            <p className={`${LABEL} mb-2`}>Exhibit list</p>
+            <ol className="divide-y divide-border">
               {c.evidence.map((e, i) => (
-                <li key={i} className="flex gap-3 px-3 py-2.5 text-sm leading-relaxed">
-                  <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <li key={i} className="flex gap-3 py-3 text-[15px] leading-relaxed">
+                  <span className="shrink-0 pt-0.5 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
                     {exhibitLabel(i)}
                   </span>
-                  <span className="text-foreground/90">{e}</span>
+                  <span className="text-ink">{e}</span>
                 </li>
               ))}
             </ol>
-            <div className="mt-3 rounded-2xl border-l-4 border-rule-border bg-rule-bg px-3 py-2 text-sm">
-              <span className="font-semibold text-foreground">Evaded rule:</span>{" "}
-              <span className="text-foreground/85">{c.evaded_rule}</span>
+            <div className="mt-3 rounded-r-md border-l-[3px] border-[#B07D2B] bg-[#FCF8EF] px-3 py-2 text-[15px]">
+              <span className="font-semibold text-ink">Evaded rule:</span>{" "}
+              <span className="text-ink">{c.evaded_rule}</span>
             </div>
           </section>
         </TabsContent>
@@ -607,47 +510,42 @@ function AgentPipeline() {
   const [expanded, setExpanded] = useState<string | null>("Finder");
   return (
     <div className="flex h-full flex-col">
-      <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Agent Pipeline
-      </h3>
-      <ol className="space-y-3">
+      <p className={`${LABEL} mb-3`}>Agent pipeline</p>
+      <ol className="space-y-2">
         {AGENT_PIPELINE.map((a, i) => {
           const stats = AGENT_RULES[a.name];
           const isOpen = expanded === a.name;
           return (
-            <li key={a.name} className="rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
+            <li key={a.name} className="rounded-md border border-border bg-surface shadow-card">
               <button
                 onClick={() => setExpanded(isOpen ? null : a.name)}
-                className="flex w-full items-center gap-2 p-5 text-left"
+                className="flex w-full items-center gap-2.5 px-5 pt-4 text-left"
               >
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-                </span>
-
-                <span className="text-sm font-semibold text-foreground">
-                  <Mono>{i + 1}.</Mono> {a.name}
+                <span className="inline-block h-2 w-2 rounded-full bg-[#2F7D5B]" />
+                <Mono className="text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </Mono>
+                <span className="text-[11px] uppercase tracking-[0.06em] font-medium text-ink">
+                  {a.name}
                 </span>
                 <span
-                  className="ml-auto text-xs text-muted-foreground transition-transform"
+                  className="ml-auto text-[11px] text-muted-foreground transition-transform"
                   style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
                 >
                   ▸
                 </span>
               </button>
-              <p className="px-5 pb-3 text-sm leading-snug text-foreground/85">
-                <span className="font-medium">{a.name}:</span> {a.summary}
-              </p>
+              <p className="px-5 pb-4 pt-2 text-[15px] leading-snug text-ink">{a.summary}</p>
               {isOpen && (
-                <div className="px-5 pb-5">
+                <div className="border-t border-border px-5 py-3 space-y-2">
                   {stats && (
-                    <p className="mb-2 text-xs text-muted-foreground">
-                      {a.name}: <Mono>{stats.rules_executed}</Mono> detection rules executed ·{" "}
-                      <Mono>{stats.findings}</Mono> findings
+                    <p className="text-[13px] text-muted-foreground">
+                      <Mono className="text-ink">{stats.rules_executed}</Mono> detection rules
+                      executed · <Mono className="text-ink">{stats.findings}</Mono> findings
                     </p>
                   )}
-                  <p className="border-l-2 border-primary/40 bg-primary/5 px-2 py-1 text-xs italic leading-snug text-primary">
-                    {a.recall}
+                  <p className="rounded-md bg-[#F7F7F5] px-3 py-2 text-[13px] italic leading-snug text-muted-foreground">
+                    ⟲ Recalled from memory: {a.recall}
                   </p>
                 </div>
               )}
@@ -656,6 +554,25 @@ function AgentPipeline() {
         })}
       </ol>
     </div>
+  );
+}
+
+
+function FilumMark() {
+  return (
+    <svg viewBox="0 0 80 60" className="h-9 w-12" aria-hidden>
+      {/* lead line */}
+      <line x1="4" y1="30" x2="22" y2="30" stroke="#C8503C" strokeWidth="1.2" />
+      {/* ring */}
+      <circle cx="40" cy="30" r="18" fill="none" stroke="#C8503C" strokeWidth="1.2" />
+      {/* dots */}
+      {Array.from({ length: 12 }).map((_, i) => {
+        const angle = (i / 12) * Math.PI * 2 - Math.PI;
+        const cx = 40 + Math.cos(angle) * 18;
+        const cy = 30 + Math.sin(angle) * 18;
+        return <circle key={i} cx={cx} cy={cy} r="2.4" fill="#1E3A5F" />;
+      })}
+    </svg>
   );
 }
 
@@ -673,54 +590,49 @@ export function CaseDesk() {
   const selected = sorted.find((c) => c.id === selectedId) ?? sorted[0];
 
   return (
-    <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="relative shrink-0 bg-[color:var(--color-header-bg)] text-white">
-        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-4 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition-all duration-200">
-              <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2.2">
-                <path d="M3 4h18v4H3zM3 12h12v8H3zM18 12h3v8h-3z" strokeLinejoin="round" />
-              </svg>
+    <div className="flex h-screen flex-col bg-background text-ink">
+      <header className="shrink-0 border-b border-border bg-surface">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-3 px-6 py-5">
+          <div className="flex flex-wrap items-center gap-5">
+            <div className="flex items-center gap-3">
+              <FilumMark />
+              <div className="flex items-baseline gap-3">
+                <span className="font-display text-[20px] font-semibold leading-none text-ink inline-block border-b-2 border-[#C8503C] pb-0.5">
+                  Filum
+                </span>
+                <span className="text-[13px] text-muted-foreground">Pull the thread.</span>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold leading-tight tracking-tight text-white">
-                CASE<span className="text-primary">/</span>DESK
-              </h1>
-              <p className="text-xs leading-tight text-white/60">
-                <Mono>5,000</Mono> real bank transactions analyzed · findings verifiable against event benchmark
-              </p>
-            </div>
-          </div>
 
-          <div className="ml-auto flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
+            <div className="ml-auto flex flex-wrap items-center gap-2">
               <HeaderStatChip value={String(HEADER_STATS.flagged)} label="cases flagged" />
               <HeaderStatChip value={HEADER_STATS.exposure} label="exposure" />
               <HeaderStatChip value={String(HEADER_STATS.ring_accounts)} label="ring accounts" />
+              <button className="ml-2 rounded-md bg-primary px-5 py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-primary-hover">
+                Run analysis
+              </button>
             </div>
-            <button className="rounded-full bg-primary px-7 py-3 text-sm font-bold text-white shadow-md transition-all duration-200 hover:bg-primary-hover hover:shadow-lg">
-              Run analysis
-            </button>
           </div>
+          <p className="text-[13px] text-muted-foreground">
+            <Mono className="text-ink">5,000</Mono> real bank transactions ·{" "}
+            one hidden fraud ring · findings verifiable against the event's answer key
+          </p>
         </div>
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-primary to-transparent" />
       </header>
 
 
       <main className="mx-auto w-full max-w-[1600px] flex-1 min-h-0 overflow-hidden px-6 py-5">
         <div className="grid h-full min-h-0 grid-cols-1 gap-5 lg:grid-cols-[36fr_40fr_24fr]">
-          <section className="flex h-full min-h-0 flex-col rounded-3xl border border-border bg-surface-raised p-6 shadow-sm transition-all duration-200">
-            <div className="mb-2 shrink-0 px-1">
+          <section className="flex h-full min-h-0 flex-col rounded-md border border-border bg-surface p-5 shadow-card">
+            <div className="mb-3 shrink-0">
               <SeverityBreakdownCollapsed />
             </div>
 
-            <div className="mb-2 flex shrink-0 items-center justify-between px-1">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Case Queue
-              </h2>
-              <span className="text-[11px] text-muted-foreground">worst first</span>
+            <div className="mb-3 flex shrink-0 items-center justify-between">
+              <h2 className="text-[20px] font-semibold tracking-[-0.01em] text-ink">Case queue</h2>
+              <span className={LABEL}>worst first</span>
             </div>
-            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
+            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-1">
               {sorted.map((c) => (
                 <CaseCard
                   key={c.id}
@@ -732,20 +644,16 @@ export function CaseDesk() {
             </div>
           </section>
 
-          <section className="h-full min-h-0 overflow-hidden rounded-3xl border border-border bg-surface p-6 shadow-sm transition-all duration-200">
+          <section className="h-full min-h-0 overflow-hidden rounded-md border border-border bg-surface p-5 shadow-card">
             <CaseDetail c={selected} />
           </section>
 
-          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-3xl border border-border bg-surface-raised p-6 shadow-sm transition-all duration-200">
-            <div className="mb-3 shrink-0">
+          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-md border border-border bg-surface p-5 shadow-card">
+            <div className="mb-4 shrink-0">
               <FindingsBySourceCard />
             </div>
             <AgentPipeline />
           </aside>
-
-
-
-
         </div>
       </main>
     </div>

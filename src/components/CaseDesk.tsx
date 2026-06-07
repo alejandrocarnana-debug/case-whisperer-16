@@ -7,6 +7,99 @@ import {
   type AuditEntry,
   type CaseStatus,
 } from "@/lib/cases-extras";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+interface BreakdownSegment {
+  label: string;
+  count: number;
+  color: string;
+}
+
+function BreakdownCard({
+  title,
+  caption,
+  segments,
+}: {
+  title: string;
+  caption?: string;
+  segments: BreakdownSegment[];
+}) {
+  const total = segments.reduce((s, x) => s + x.count, 0);
+  return (
+    <Card className="rounded-lg border-border bg-surface shadow-none">
+      <CardHeader className="space-y-1 p-3 pb-2">
+        <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {title}
+        </CardTitle>
+        {caption && (
+          <CardDescription className="text-[11px] leading-snug">{caption}</CardDescription>
+        )}
+      </CardHeader>
+      <CardContent className="space-y-2.5 p-3 pt-0">
+        <div className="flex h-2 w-full overflow-hidden rounded-full bg-secondary">
+          {segments.map((s) => (
+            <div
+              key={s.label}
+              className="animate-bar-grow h-full transition-[width] duration-700 ease-out"
+              style={{
+                width: `${(s.count / total) * 100}%`,
+                backgroundColor: s.color,
+              }}
+              title={`${s.label}: ${s.count}`}
+            />
+          ))}
+        </div>
+        <ul className="space-y-1">
+          {segments.map((s) => {
+            const pct = ((s.count / total) * 100).toFixed(1);
+            return (
+              <li key={s.label} className="flex items-center gap-2 text-xs">
+                <span
+                  className="inline-block h-3 w-[3px] rounded-sm"
+                  style={{ backgroundColor: s.color }}
+                />
+                <span className="num font-semibold text-foreground tabular-nums">{pct}%</span>
+                <span className="ml-auto text-muted-foreground">
+                  <span className="num font-semibold text-foreground">{s.count}</span>
+                  <span className="mx-1">·</span>
+                  {s.label}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SeverityBreakdownCard() {
+  return (
+    <BreakdownCard
+      title="Severity Breakdown"
+      segments={[
+        { label: "Critical", count: 4, color: "var(--severity-critical)" },
+        { label: "High", count: 9, color: "var(--severity-high)" },
+        { label: "Review", count: 10, color: "var(--source-slate)" },
+      ]}
+    />
+  );
+}
+
+function FindingsBySourceCard() {
+  return (
+    <BreakdownCard
+      title="Findings by Source"
+      caption="Detected by Finder across 3 rule sets"
+      segments={[
+        { label: "Circular flows", count: 6, color: "var(--source-blue)" },
+        { label: "Structuring", count: 11, color: "var(--source-teal)" },
+        { label: "Duplicate transactions", count: 6, color: "var(--source-slate)" },
+      ]}
+    />
+  );
+}
+
 
 const formatExposure = (n: number) =>
   n >= 1000 ? `$${(n / 1000).toFixed(1)}K` : `$${n}`;

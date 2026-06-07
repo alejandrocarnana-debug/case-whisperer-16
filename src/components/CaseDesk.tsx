@@ -613,8 +613,8 @@ export function CaseDesk() {
   const selected = sorted.find((c) => c.id === selectedId) ?? sorted[0];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-surface">
+    <div className="flex h-screen flex-col bg-background text-foreground">
+      <header className="shrink-0 border-b border-border bg-surface">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition-all duration-200">
@@ -643,19 +643,19 @@ export function CaseDesk() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] px-6 py-5">
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[30fr_45fr_25fr]">
-          <section className="flex flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
-            <div className="mb-2 px-1">
+      <main className="mx-auto w-full max-w-[1600px] flex-1 min-h-0 overflow-hidden px-6 py-5">
+        <div className="grid h-full min-h-0 grid-cols-1 gap-5 lg:grid-cols-[36fr_40fr_24fr]">
+          <section className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
+            <div className="mb-2 shrink-0 px-1">
               <SeverityBreakdownCard />
             </div>
-            <div className="mb-2 flex items-center justify-between px-1">
+            <div className="mb-2 flex shrink-0 items-center justify-between px-1">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Case Queue
               </h2>
               <span className="text-[11px] text-muted-foreground">worst first</span>
             </div>
-            <div className="flex max-h-[calc(100vh-180px)] flex-col gap-3 overflow-y-auto pr-1">
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
               {sorted.map((c) => (
                 <CaseCard
                   key={c.id}
@@ -667,16 +667,17 @@ export function CaseDesk() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200 lg:max-h-[calc(100vh-130px)]">
+          <section className="h-full min-h-0 overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200">
             <CaseDetail c={selected} />
           </section>
 
-          <aside className="rounded-2xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto">
-            <div className="mb-3">
+          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-2xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200">
+            <div className="mb-3 shrink-0">
               <FindingsBySourceCard />
             </div>
             <AgentPipeline />
           </aside>
+
 
 
 

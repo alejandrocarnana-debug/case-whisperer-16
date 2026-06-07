@@ -92,6 +92,24 @@
 
   --rule-bg: oklch(0.965 0.04 80);
   --rule-border: oklch(0.78 0.13 75);
+
+  /* Status stamps */
+  --stamp-amber: oklch(0.55 0.16 65);
+  --stamp-amber-bg: oklch(0.985 0.03 80);
+  --stamp-red: oklch(0.50 0.22 27);
+  --stamp-red-bg: oklch(0.985 0.03 27);
+  --stamp-green: oklch(0.50 0.15 145);
+  --stamp-green-bg: oklch(0.985 0.03 145);
+  --stamp-blue: oklch(0.45 0.16 258);
+  --stamp-blue-bg: oklch(0.985 0.03 258);
+}
+
+@layer utilities {
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
 }
 
 @layer base {

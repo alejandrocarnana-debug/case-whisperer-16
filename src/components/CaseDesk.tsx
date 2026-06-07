@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import filumLogo from "@/assets/filum-logo.png.asset.json";
 import { CASES, HEADER_STATS, AGENT_PIPELINE, type Case, type Severity } from "@/lib/cases-data";
 import {
   CASE_EXTRAS,
@@ -24,7 +25,7 @@ const SEVERITY_SEGMENTS: BreakdownSegment[] = [
 ];
 
 const SOURCE_SEGMENTS: BreakdownSegment[] = [
-  { label: "Circular flows", count: 6, color: "#1E3A5F" },
+  { label: "Circular flows", count: 6, color: "#1B2B4B" },
   { label: "Structuring", count: 11, color: "#5B6472" },
   { label: "Duplicate transactions", count: 6, color: "#B07D2B" },
 ];
@@ -121,7 +122,7 @@ const formatExposure = (n: number) =>
 const formatAmount = (n: number) => `$${n.toLocaleString("en-US")}`;
 
 const severityStyles: Record<Severity, string> = {
-  CRITICAL: "bg-[#FBEAE6] text-[#C8503C]",
+  CRITICAL: "bg-[#FBEAE5] text-[#D6452B]",
   HIGH: "bg-[#F8F0DF] text-[#B07D2B]",
   REVIEW: "bg-[#EEEFF1] text-[#5B6472]",
 };
@@ -134,7 +135,7 @@ const statusStampColor: Record<CaseStatus, { fg: string; bg: string }> = {
 };
 
 const riskColor = (n: number) =>
-  n >= 80 ? "text-[#C8503C]" : n >= 50 ? "text-[#B07D2B]" : "text-[#5B6472]";
+  n >= 80 ? "text-[#D6452B]" : n >= 50 ? "text-[#B07D2B]" : "text-[#5B6472]";
 
 type RecKey = "escalate" | "flag" | "dismiss";
 const recommendedKey = (rec: string): RecKey => {
@@ -188,7 +189,7 @@ function SlaChip({ hours }: { hours: number }) {
     <span
       className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.04em] ${
         urgent
-          ? "bg-[#FBEAE6] text-[#C8503C]"
+          ? "bg-[#F8F0DF] text-[#B07D2B]"
           : "bg-[#EEEFF1] text-[#5B6472]"
       }`}
     >
@@ -262,7 +263,7 @@ function RulesRow({ c }: { c: Case }) {
         {extras.triggered_rules.map((r) => (
           <span
             key={r}
-            className="inline-flex items-center rounded-full bg-[#FBEAE6] px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.04em] text-[#C8503C]"
+            className="inline-flex items-center rounded-full bg-[#EEEFF1] px-2 py-0.5 text-[11px] font-medium uppercase tracking-[0.04em] text-[#5B6472]"
           >
             <Mono>{r}</Mono>
           </span>
@@ -317,10 +318,10 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
 
           <div
             aria-hidden
-            className="pointer-events-none absolute left-6 right-6 bottom-3 h-8 rounded-b-[999px] border-x border-b border-[#C8503C]"
+            className="pointer-events-none absolute left-6 right-6 bottom-3 h-8 rounded-b-[999px] border-x border-b border-[#D6452B]"
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-1 flex justify-center">
-            <span className="bg-surface px-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[#C8503C]">
+            <span className="bg-surface px-2 text-[11px] font-medium uppercase tracking-[0.06em] text-[#D6452B]">
               ↺ Circular flow detected
             </span>
           </div>
@@ -418,7 +419,10 @@ function CaseDetail({ c }: { c: Case }) {
           <span className="font-semibold text-ink">{recLabel[recKey]}</span>
           <span className="text-muted-foreground"> — {c.action_reason}</span>
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="relative my-4 h-px w-full" style={{ backgroundColor: "rgba(214,69,43,0.4)" }} aria-hidden>
+          <span className="absolute right-0 -top-[2.5px] block h-1.5 w-1.5 rounded-full bg-[#1B2B4B]" />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onEscalate}
             className={`rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-primary-hover ${recRing("escalate")}`}
@@ -558,23 +562,8 @@ function AgentPipeline() {
 }
 
 
-function FilumMark() {
-  return (
-    <svg viewBox="0 0 80 60" className="h-9 w-12" aria-hidden>
-      {/* lead line */}
-      <line x1="4" y1="30" x2="22" y2="30" stroke="#C8503C" strokeWidth="1.2" />
-      {/* ring */}
-      <circle cx="40" cy="30" r="18" fill="none" stroke="#C8503C" strokeWidth="1.2" />
-      {/* dots */}
-      {Array.from({ length: 12 }).map((_, i) => {
-        const angle = (i / 12) * Math.PI * 2 - Math.PI;
-        const cx = 40 + Math.cos(angle) * 18;
-        const cy = 30 + Math.sin(angle) * 18;
-        return <circle key={i} cx={cx} cy={cy} r="2.4" fill="#1E3A5F" />;
-      })}
-    </svg>
-  );
-}
+// Logo image lives at filumLogo.url (CDN). No SVG fallback component needed —
+// brand asset is a single PNG lockup.
 
 
 export function CaseDesk() {
@@ -594,14 +583,25 @@ export function CaseDesk() {
       <header className="shrink-0 border-b border-border bg-surface">
         <div className="mx-auto flex max-w-[1600px] flex-col gap-3 px-6 py-5">
           <div className="flex flex-wrap items-center gap-5">
-            <div className="flex items-center gap-3">
-              <FilumMark />
-              <div className="flex items-baseline gap-3">
-                <span className="font-display text-[20px] font-semibold leading-none text-ink inline-block border-b-2 border-[#C8503C] pb-0.5">
-                  Filum
-                </span>
-                <span className="text-[13px] text-muted-foreground">Pull the thread.</span>
-              </div>
+            <div className="flex items-center gap-4">
+              <img
+                src={filumLogo.url}
+                alt="Filum"
+                className="h-9 w-auto"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  img.style.display = "none";
+                  const fb = img.nextElementSibling as HTMLElement | null;
+                  if (fb) fb.style.display = "inline-block";
+                }}
+              />
+              <span
+                style={{ display: "none" }}
+                className="text-[22px] font-bold leading-none text-[#1B2B4B] tracking-[-0.02em] border-b-2 border-[#D6452B] pb-0.5"
+              >
+                Filum
+              </span>
+              <span className="text-[13px] text-muted-foreground">Pull the thread.</span>
             </div>
 
             <div className="ml-auto flex flex-wrap items-center gap-2">

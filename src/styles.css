@@ -47,7 +47,6 @@
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --font-display: "Space Grotesk", "Inter", sans-serif;
 }
 
 
@@ -55,7 +54,7 @@
   --radius: 0.5rem; /* 8px */
 
   /* Institutional canvas */
-  --background: #FAFAF8;
+  --background: #FAF9F6;
   --foreground: #16181D;
   --ink: #16181D;
   --surface: #FFFFFF;
@@ -67,9 +66,9 @@
   --popover: #FFFFFF;
   --popover-foreground: #16181D;
 
-  --primary: #1E3A5F;
+  --primary: #1B2B4B;
   --primary-foreground: #FFFFFF;
-  --primary-hover: #16294A;
+  --primary-hover: #14213A;
 
   --secondary: #F4F6F9;
   --secondary-foreground: #16181D;
@@ -78,15 +77,15 @@
   --accent: #F4F6F9;
   --accent-foreground: #16181D;
 
-  --destructive: #C8503C;
+  --destructive: #D6452B;
   --destructive-foreground: #FFFFFF;
-  --border: #E5E3DD;
-  --input: #E5E3DD;
-  --ring: #1E3A5F;
+  --border: #E7E4DD;
+  --input: #E7E4DD;
+  --ring: #1B2B4B;
 
   /* Severity */
-  --severity-critical: #C8503C;
-  --severity-critical-bg: #FBEAE6;
+  --severity-critical: #D6452B;
+  --severity-critical-bg: #FBEAE5;
   --severity-high: #B07D2B;
   --severity-high-bg: #F8F0DF;
   --severity-review: #5B6472;
@@ -101,17 +100,12 @@
   /* Stamps */
   --stamp-amber: #B07D2B;
   --stamp-amber-bg: #F8F0DF;
-  --stamp-red: #C8503C;
-  --stamp-red-bg: #FBEAE6;
+  --stamp-red: #D6452B;
+  --stamp-red-bg: #FBEAE5;
   --stamp-green: #2F7D5B;
   --stamp-green-bg: #EAF3EE;
-  --stamp-blue: #1E3A5F;
+  --stamp-blue: #1B2B4B;
   --stamp-blue-bg: #EEF2F7;
-
-  /* Source palette (kept for breakdown segments) */
-  --source-blue: #1E3A5F;
-  --source-teal: #5B6472;
-  --source-slate: #B07D2B;
 }
 
 
@@ -129,9 +123,6 @@
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum" 1;
-  }
-  .font-display {
-    font-family: var(--font-display);
   }
   .shadow-card {
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);

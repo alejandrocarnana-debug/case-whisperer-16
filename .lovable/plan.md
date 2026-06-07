@@ -1,114 +1,94 @@
-# Filum Visual Pass — Institutional Fraud-Ops Look
+# Filum brand restyle — styling only
 
-Styling only. No layout, structure, data, behavior, file/function renames.
+Visual pass to match the supplied logo. No layout, logic, component, or naming changes.
 
-## 1. Fonts — `src/routes/__root.tsx`
+## 1. Logo asset
 
-Add Google Fonts `<link>`s for: Inter (400/500/600/650), IBM Plex Mono (500), Space Grotesk (600). Remove any other display font links currently loaded.
+Upload the previously attached Filum logo and serve it at `/filum-logo.png` (so the user's specified path works):
+
+```bash
+lovable-assets create --file /mnt/user-uploads/image.png --filename filum-logo.png > public/filum-logo.png.asset.json
+```
+
+Then copy to `public/filum-logo.png` is not how lovable-assets works — the asset is served from the CDN URL in the `.asset.json`. I'll instead import that pointer in `CaseDesk.tsx` and use `logo.url` for the `<img src>`. If you specifically need the literal `/filum-logo.png` path (e.g. for a future printable report served from `public/`), say so and I'll place the binary in `public/` instead.
 
 ## 2. Tokens — `src/styles.css`
 
-Replace `:root` color/radius/font tokens (keep variable names so components keep working):
+Replace values (variable names unchanged):
 
-- `--radius: 0.5rem` (8px)
-- `--background: #FAFAF8`
-- `--surface / --surface-raised / --card / --popover: #FFFFFF`
-- `--foreground / --card-foreground / --popover-foreground / --ink: #16181D`
+- `--background: #FAF9F6`
+- `--foreground / --ink / --card-foreground / --popover-foreground: #16181D`
 - `--muted-foreground: #5B6472`
-- `--border / --input: #E5E3DD`
-- `--primary: #1E3A5F`, `--primary-hover: #16294A`, `--primary-foreground: #FFFFFF`, `--ring: #1E3A5F`
-- `--secondary: #F4F6F9`, `--secondary-foreground: #16181D`
-- `--muted: #EEEFF1`, `--accent: #F4F6F9`
-- `--destructive: #C8503C` (thread red)
-- `--header-bg: #FFFFFF` (header becomes the same calm surface, not the dark band)
-- Remove `--blush`; reuse for severity backgrounds via new tokens below
-- Severity tokens:
-  - `--severity-critical: #C8503C`, `--severity-critical-bg: #FBEAE6`
-  - `--severity-high: #B07D2B`, `--severity-high-bg: #F8F0DF`
-  - `--severity-review: #5B6472`, `--severity-review-bg: #EEEFF1`
-- `--success: #2F7D5B`
-- `--rule-bg: #FCF8EF`, `--rule-border: #B07D2B`
-- Stamps: align to new palette (`stamp-red: #C8503C/#FBEAE6`, `stamp-amber: #B07D2B/#F8F0DF`, `stamp-green: #2F7D5B/#EAF3EE`, `stamp-blue: #1E3A5F/#EEF2F7`)
-- `--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif`
-- `--font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace`
-- Add `--font-display: "Space Grotesk", "Inter", sans-serif` (wordmark only)
-- Map `--color-display` in `@theme inline`
+- `--border / --input: #E7E4DD`
+- `--primary: #1B2B4B`, `--primary-hover: #14213A`, `--ring: #1B2B4B`
+- `--destructive: #D6452B`
+- Severity:
+  - critical `#D6452B` on `#FBEAE5`
+  - high `#B07D2B` on `#F8F0DF`
+  - review `#5B6472` on `#EEEFF1`
+- Stamps re-aligned to new palette (red→`#D6452B/#FBEAE5`, blue→`#1B2B4B/#EEF2F7`, green stays, amber stays)
+- Remove `--font-display` and the `.font-display` utility (Space Grotesk leaves the bundle in step 4).
+- Shadow cap: only `0 1px 2px rgba(0,0,0,0.04)` — strip any larger `shadow-*` usage.
 
-Shadow: add `--shadow-card: 0 1px 2px rgba(0,0,0,0.04)`; map and use everywhere shadow is currently `shadow-sm`/`shadow-md`. Remove all gradients, `backdrop-blur`, larger shadows.
+## 3. Header — `CaseDesk.tsx`
 
-Base styles: `body { font-size: 15px; line-height: 1.5; }`; headings 1.25. Tabular-nums on `.num` stays.
+- Replace the `<FilumMark/>` SVG + wordmark text with `<img src={logo.url} alt="Filum" height={36} className="h-9 w-auto" onError={fallbackToText}/>`. The text fallback: `Filum` in Inter 700 / 22px / #1B2B4B / -0.02em / 2px #D6452B underline under the word only.
+- Tagline beside it unchanged ("Pull the thread.", 13px #5B6472).
+- Second line text unchanged.
+- Drop the `FilumMark` SVG component.
 
-## 3. CaseDesk.tsx — sweep, no structural change
+## 4. Fonts — `src/routes/__root.tsx`
 
-### Header (~661–688)
-- Background `bg-white`, bottom `border-b border-border`. Remove the dark band, the gradient line, all white-on-dark utilities.
-- Logo block: small SVG ring icon (12 navy dots on a #C8503C circle outline with a short #C8503C lead line) + wordmark `Filum` in `font-display text-[20px] font-semibold text-ink` with a 2px #C8503C bottom border **under the word only** (inline-block + `border-b-2 border-[#C8503C]`). Tagline beside: `Pull the thread.` 13px `text-muted-foreground`.
-- Second line under wordmark row: 13px muted: "5,000 real bank transactions · one hidden fraud ring · findings verifiable against the event's answer key".
-- Stat chips: white cards, 1px border, 8px radius, padding 16/20px. Value: mono 20px/600 ink. Label: 11px uppercase 0.06em tracking, muted.
-- Run Analysis button: `bg-primary text-white rounded-md` (6px), 13px 600, hover `bg-[#16294A]`. No pill.
+Remove Space Grotesk from the Google Fonts `<link>`; keep Inter + IBM Plex Mono only.
 
-### Global className sweep
-- Replace every `rounded-2xl`/`rounded-3xl`/`rounded-full` on cards/buttons/inputs with `rounded-md` (8px). Keep `rounded-full` ONLY on status dots and the small severity pills.
-- Replace `shadow-md`/`shadow-lg` with `shadow-[0_1px_2px_rgba(0,0,0,0.04)]`.
-- Remove all `bg-gradient-*`, `backdrop-blur*`, `before:` colored left edges of 3px+ except the queue selected state.
+## 5. Red audit (CaseDesk.tsx)
 
-### Typography sweep
-- Page title (only one) → `text-[28px] font-[650] tracking-[-0.02em]`.
-- Pane headings (Case Detail / Agent Pipeline / Queue) → `text-[20px] font-semibold tracking-[-0.01em]`.
-- Card titles / case names → `text-base font-semibold` (16/600).
-- Body / evidence → `text-[15px]`.
-- Metadata / timestamps → `text-[13px] font-medium text-muted-foreground`.
-- Uppercase labels → `text-[11px] uppercase tracking-[0.06em] font-medium text-muted-foreground`.
-- All numerals (risk score, exposures, confidence, percentages, account IDs, txn IDs, dates) → wrap in `font-mono font-medium` (`num` class already does tabular). Right-align currency cells.
-- Risk score hero: `text-5xl font-mono font-medium tracking-tight` colored by severity (red/amber/slate per existing thresholds remapped to new severity colors).
-- Remove every italic except agent "⟲ Recalled from memory:" line.
+Replace every remaining `#C8503C` / red usage with the new palette and keep red ONLY on:
+- CRITICAL severity badge (text on `#FBEAE5`)
+- wordmark underline
+- the ring outline in any ring/graph visual
+- the new thread divider
 
-### Buttons
-- Primary (Approve Action, Run Analysis, Escalate): `bg-primary text-white rounded-md` 13px 600.
-- All others: `bg-white border border-border text-ink rounded-md hover:bg-secondary`.
+Specifically de-red:
+- Money flow's "circular flow detected" arc + caption → switch to `#5B6472`
+- Triggered rule chips → switch chip bg/text to neutral severity-review palette (chip stays distinct from "Evaded" by remaining filled vs outlined)
+- SLA urgent chip → keep red because urgent SLA is genuinely critical signal; **flag for confirmation**: if you want SLA never red, say so and I'll switch urgent SLA to the high-amber palette.
 
-### Severity badges
-- `text-[11px] uppercase tracking-[0.04em] font-medium px-2 py-0.5 rounded-full`
-- CRITICAL → `text-[#C8503C] bg-[#FBEAE6]`
-- HIGH → `text-[#B07D2B] bg-[#F8F0DF]`
-- REVIEW → `text-[#5B6472] bg-[#EEEFF1]`
+## 6. Thread divider (the one decorative element)
 
-### Queue cards
-- White, 1px border, 8px radius, padding 20px, 12px gap.
-- Severity pill top-left, account ID mono top-right.
-- Exposure: mono 16px/600 ink.
-- Reason: 13px muted, one line.
-- Selected: `border-l-2 border-l-primary bg-[#F4F6F9]` (replaces the 3px primary edge / pill bg).
+Add inside `CaseDetail`, between the recommendation text and the row of action buttons (Escalate / Flag / Dismiss / Download report):
 
-### Case detail evidence rows
-- Replace boxed evidence rows with vertical stack separated by `border-b border-border` hairlines, 16px vertical padding. Remove individual card borders inside.
-- "Evaded rule:" row: `border-l-[3px] border-l-[#B07D2B] bg-[#FCF8EF] pl-3 py-2 rounded-r-md`.
+```tsx
+<div className="relative my-4 h-px w-full" style={{ backgroundColor: "rgba(214,69,43,0.4)" }}>
+  <span className="absolute -right-0 -top-[2.5px] block h-1.5 w-1.5 rounded-full bg-[#1B2B4B]" />
+</div>
+```
 
-### Recommendation card
-- White surface, 1px border, 8px radius, 20px padding. Remove blush tint. Heading 11px uppercase label + 16/600 recommendation text.
+Your wording was "separates evidence section from action buttons." In the current layout the action buttons sit in the recommendation card ABOVE the Evidence tab — there is no buttons-below-evidence region. I'm placing the divider in the only valid spot without restructuring: inside the recommendation card, right above the action buttons. If you actually want a layout move (buttons relocated below the tabs so the divider can separate them), tell me and I'll do that as a separate change.
 
-### Agent pipeline cards
-- White, 1px border, 8px radius, 20px padding.
-- Agent name as 11px uppercase label; summary 15px ink.
-- Status dot 8px round; running uses `#1E3A5F` pulse, success `#2F7D5B`, no other colors.
-- Recalled line: `italic text-[13px] text-muted-foreground bg-[#F7F7F5] rounded-md px-3 py-2`.
+## 7. Numbers everywhere
 
-### Fraud-likelihood bar
-- Track 6px `bg-border rounded-full`, fill `bg-primary rounded-full`. Value beside: `font-mono` `87% [79–93%]`.
+Quick sweep confirming every numeric value uses `<Mono>` (already mostly done): risk score, exposures, percentages, account IDs, transaction IDs, dates, SLA hours, breakdown counts, audit timestamps. Currency cells stay right-aligned where currently right-aligned.
 
-### Tabs
-- `TabsList`: `bg-secondary rounded-md p-0.5`. `TabsTrigger`: `rounded-sm px-3 py-1 text-[13px]`, active `bg-white text-ink shadow-[0_1px_2px_rgba(0,0,0,0.04)]`. No pill.
+## 8. Report
 
-### Misc
-- StatusStamp: keep stamped feel but switch to new palette, remove rotation if it reads "playful"; keep dashed border + uppercase 11px.
-- SLA chip: 11px uppercase pill, severity colors per above.
-- Audit log rows: hairline-separated, mono timestamps.
-- Modals / report preview / empty states: same surface/border/radius/shadow rules, Inter throughout, primary button style.
+No `Report` component exists today — "Download report" only appends an audit-log line. **Two options**:
+- (a) Skip the report styling — there's nothing to style.
+- (b) I add a small Report preview modal/page styled per spec (logo at 28px + "Case File" Inter 600).
 
-## 4. Out of scope
-Layout grid, three-zone structure, tabs sub-structure, queue contents, agent feed content, exhibits, money-flow timeline, audit log content, action handlers, Run Analysis behavior, Download Report behavior, file/function renames.
+Default is (a). Tell me if you want (b) and I'll add it in a follow-up.
 
 ## Files touched
-- `src/styles.css`
-- `src/routes/__root.tsx` (font links)
-- `src/components/CaseDesk.tsx` (className + small inline SVG logo swap)
+
+- `src/styles.css` (tokens, drop font-display utility)
+- `src/routes/__root.tsx` (drop Space Grotesk)
+- `src/components/CaseDesk.tsx` (logo `<img>`, remove FilumMark, recolor, thread divider)
+- `public/filum-logo.png.asset.json` (new pointer)
+
+## Confirm before I build
+
+1. Logo path: OK to import `logo.asset.json` and use `logo.url`? (Or do you want the binary copied into `public/` literally?)
+2. SLA urgent chip: stay red, or move to amber?
+3. Report styling: skip (a), or add a preview modal (b)?
+
+If you just reply "go", I'll proceed with (1) asset pointer, (2) keep SLA red, (3) skip report.

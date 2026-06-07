@@ -14,11 +14,11 @@ import {
 } from "recharts";
 import type { Case } from "@/lib/cases-data";
 
-const MONO_TICK: React.CSSProperties = {
+const MONO_TICK = {
   fontFamily: "var(--font-mono)",
   fontSize: 11,
   fill: "#5B6472",
-};
+} as const;
 
 const LABEL =
   "text-[13px] uppercase tracking-[0.06em] font-medium text-muted-foreground";

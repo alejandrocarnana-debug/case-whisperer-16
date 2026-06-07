@@ -8,6 +8,9 @@ import {
   type CaseStatus,
 } from "@/lib/cases-extras";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 
 interface BreakdownSegment {
   label: string;
@@ -85,6 +88,61 @@ function SeverityBreakdownCard() {
     />
   );
 }
+
+const SEVERITY_SEGMENTS: BreakdownSegment[] = [
+  { label: "Critical", count: 4, color: "var(--severity-critical)" },
+  { label: "High", count: 9, color: "var(--severity-high)" },
+  { label: "Review", count: 10, color: "var(--source-slate)" },
+];
+
+function SeverityBreakdownCollapsed() {
+  const total = SEVERITY_SEGMENTS.reduce((s, x) => s + x.count, 0);
+  const critical = SEVERITY_SEGMENTS[0].count;
+  return (
+    <Collapsible className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+      <CollapsibleTrigger className="group flex w-full items-center gap-3 p-3 text-left">
+        <div className="flex h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+          {SEVERITY_SEGMENTS.map((s) => (
+            <div
+              key={s.label}
+              style={{ width: `${(s.count / total) * 100}%`, backgroundColor: s.color }}
+              className="h-full"
+            />
+          ))}
+        </div>
+        <span className="shrink-0 text-xs text-muted-foreground">
+          <Mono className="font-semibold text-foreground">{total}</Mono> findings ·{" "}
+          <Mono className="font-semibold text-foreground">{critical}</Mono> critical
+        </span>
+        <span className="shrink-0 text-xs text-muted-foreground transition-transform group-data-[state=open]:rotate-90">
+          ▸
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-3 pb-3">
+        <ul className="space-y-1">
+          {SEVERITY_SEGMENTS.map((s) => {
+            const pct = ((s.count / total) * 100).toFixed(1);
+            return (
+              <li key={s.label} className="flex items-center gap-2 text-xs">
+                <span
+                  className="inline-block h-3 w-[3px] rounded-sm"
+                  style={{ backgroundColor: s.color }}
+                />
+                <span className="num font-semibold text-foreground tabular-nums">{pct}%</span>
+                <span className="ml-auto text-muted-foreground">
+                  <span className="num font-semibold text-foreground">{s.count}</span>
+                  <span className="mx-1">·</span>
+                  {s.label}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
 
 function FindingsBySourceCard() {
   return (
@@ -221,31 +279,36 @@ function CaseCard({
       }`}
     >
       <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]} ${active ? "opacity-0" : ""}`} />
-      <div className="flex items-start justify-between gap-3 pl-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <SeverityBadge s={c.severity} />
+      {extras && (
+        <span className="absolute right-3 top-3">
+          <span
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] ${
+              extras.sla_hours < 24
+                ? "border-severity-critical/30 bg-severity-critical-bg text-severity-critical"
+                : "border-border bg-secondary text-muted-foreground"
+            }`}
+          >
+            <Mono className="font-semibold">{extras.sla_hours}h</Mono>
+          </span>
+        </span>
+      )}
+      <div className="flex flex-col gap-2 pl-2 pr-12">
+        <div className="flex items-center justify-between gap-3">
           <Mono className="text-sm text-muted-foreground">{c.account_id}</Mono>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          {extras && <StatusStamp status={extras.case_status} size="sm" />}
           <Mono className={`text-xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
             {c.fraud_prob}
           </Mono>
         </div>
-      </div>
-      <div className="mt-3 flex items-baseline justify-between gap-2 pl-2">
-        <Mono className="text-2xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
-        <span className="text-[11px] uppercase tracking-wide text-muted-foreground">exposure</span>
-      </div>
-      <p className="mt-2 pl-2 text-base leading-snug text-foreground/85">{c.reason}</p>
-      {extras && (
-        <div className="mt-3 pl-2">
-          <SlaChip hours={extras.sla_hours} />
+        <div className="flex items-center justify-between gap-3">
+          <Mono className="text-2xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
+          <SeverityBadge s={c.severity} />
         </div>
-      )}
+        <p className="line-clamp-1 text-base leading-snug text-foreground/85">{c.reason}</p>
+      </div>
     </button>
   );
 }
+
 
 
 
@@ -366,49 +429,19 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
   );
 }
 
-function AuditLog({
-  entries,
-  open,
-  onToggle,
-}: {
-  entries: AuditEntry[];
-  open: boolean;
-  onToggle: () => void;
-}) {
+function AuditLogList({ entries }: { entries: AuditEntry[] }) {
   return (
-    <section className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
-      <button
-        onClick={onToggle}
-        className="flex w-full items-center justify-between gap-2 rounded-full px-3 py-2 text-left transition-all duration-200"
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Audit Log
-          </span>
-          <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">
-            <Mono>{entries.length}</Mono>
-          </span>
-        </div>
-        <span
-          className="text-xs text-muted-foreground transition-transform"
-          style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}
-        >
-          ▸
-        </span>
-      </button>
-      {open && (
-        <ol className="max-h-44 overflow-y-auto border-t border-border px-3 py-2">
-          {entries.map((e, i) => (
-            <li key={i} className="flex gap-3 py-1 text-xs leading-relaxed">
-              <Mono className="shrink-0 text-muted-foreground">{e.time}</Mono>
-              <span className="text-foreground/85">{e.text}</span>
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
+    <ol className="max-h-[60vh] overflow-y-auto">
+      {entries.map((e, i) => (
+        <li key={i} className="flex gap-3 py-1 text-xs leading-relaxed">
+          <Mono className="shrink-0 text-muted-foreground">{e.time}</Mono>
+          <span className="text-foreground/85">{e.text}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
+
 
 
 const nowStamp = () => {
@@ -417,10 +450,15 @@ const nowStamp = () => {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
+const recLabel: Record<RecKey, string> = {
+  escalate: "Escalate",
+  flag: "Flag for Review",
+  dismiss: "Dismiss",
+};
+
 function CaseDetail({ c }: { c: Case }) {
   const extras = CASE_EXTRAS[c.id];
   const [audit, setAudit] = useState<AuditEntry[]>([]);
-  const [auditOpen, setAuditOpen] = useState(true);
   const [caseStatus, setCaseStatus] = useState<CaseStatus | undefined>(extras?.case_status);
 
   // Reset audit log + status when switching cases.
@@ -434,9 +472,7 @@ function CaseDetail({ c }: { c: Case }) {
 
   const onEscalate = () => {
     setCaseStatus("ESCALATED");
-    append(
-      `Analyst escalated ${c.account_id} — recommendation: ${c.recommended_action}`,
-    );
+    append(`Analyst escalated ${c.account_id} — recommendation: ${c.recommended_action}`);
   };
   const onFlag = () => {
     setCaseStatus("UNDER REVIEW");
@@ -447,76 +483,35 @@ function CaseDetail({ c }: { c: Case }) {
     append(`Analyst dismissed ${c.account_id} — no action taken`);
   };
   const onDownload = () =>
-    append(
-      `Analyst downloaded full case report for ${c.account_id} (PDF) — audit log included`,
-    );
+    append(`Analyst downloaded full case report for ${c.account_id} (PDF) — audit log included`);
 
   const recKey = recommendedKey(c.recommended_action);
-  const rec = (k: RecKey) =>
-    recKey === k ? "ring-2 ring-primary/40" : "";
+  const rec = (k: RecKey) => (recKey === k ? "ring-2 ring-primary/40" : "");
 
   return (
-    <div className="flex h-full flex-col gap-5 overflow-y-auto">
-      <section className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <Mono className={`text-5xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
-          RISK {c.fraud_prob}
-        </Mono>
-        <span className="text-xl text-muted-foreground">/100</span>
-        <div className="basis-full text-sm text-muted-foreground">
+    <div className="flex h-full flex-col gap-6 overflow-y-auto">
+      {/* 1. Identity + Risk */}
+      <section className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Mono className="text-xl font-bold text-foreground">{c.account_id}</Mono>
+          {caseStatus && <StatusStamp status={caseStatus} />}
+        </div>
+        <div className="flex flex-wrap items-baseline gap-x-3">
+          <Mono className={`text-5xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
+            RISK {c.fraud_prob}
+          </Mono>
+          <span className="text-xl text-muted-foreground">/100</span>
+        </div>
+        <div className="text-sm text-muted-foreground">
           <Mono>{c.fraud_ci[0]}–{c.fraud_ci[1]}%</Mono> confidence
         </div>
       </section>
 
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <SeverityBadge s={c.severity} />
-          {caseStatus && <StatusStamp status={caseStatus} />}
-          <Mono className="text-xl font-semibold text-foreground">{c.account_id}</Mono>
-          <span className="text-sm text-muted-foreground">·</span>
-          <span className="text-sm text-foreground/80">{c.reason}</span>
-        </div>
-        <div className="text-right">
-          <Mono className="block text-2xl font-semibold">{formatExposure(c.exposure)}</Mono>
-          <div className="text-[11px] uppercase tracking-wide text-muted-foreground">exposure</div>
-        </div>
-      </header>
-
-      <RulesRow c={c} />
-
-      <section>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Exhibit List
-        </h3>
-        <ol className="space-y-2">
-          {c.evidence.map((e, i) => (
-            <li
-              key={i}
-              className="flex gap-3 rounded-2xl border border-border bg-surface px-3 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-200"
-            >
-              <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                {exhibitLabel(i)}
-              </span>
-              <span className="text-foreground/90">{e}</span>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-3 rounded-2xl border-l-4 border-rule-border bg-rule-bg px-3 py-2 text-sm">
-          <span className="font-semibold text-foreground">Evaded rule:</span>{" "}
-          <span className="text-foreground/85">{c.evaded_rule}</span>
-        </div>
-
-      </section>
-
-      <MoneyFlowTimeline c={c} />
-
-      <section>
-        <FraudBar prob={c.fraud_prob} ci={c.fraud_ci} />
-      </section>
-
-      <section>
-        <p className="mb-2 text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">Recommended:</span>{" "}
-          {c.recommended_action} — {c.action_reason}
+      {/* 2. Recommendation card — decision zone */}
+      <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+        <p className="mb-4 text-sm text-foreground/85">
+          <span className="font-semibold text-foreground">Recommended: {recLabel[recKey]}</span>
+          <span className="text-muted-foreground"> — {c.action_reason}</span>
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -537,7 +532,6 @@ function CaseDetail({ c }: { c: Case }) {
           >
             Dismiss
           </button>
-
           <div className="ml-auto flex items-center gap-2">
             <span className="text-[11px] text-muted-foreground">includes full audit log</span>
             <button
@@ -548,15 +542,54 @@ function CaseDetail({ c }: { c: Case }) {
             </button>
           </div>
         </div>
-
       </section>
 
-      <AuditLog entries={audit} open={auditOpen} onToggle={() => setAuditOpen((v) => !v)} />
+      {/* 3. Tabs */}
+      <Tabs defaultValue="evidence" className="w-full">
+        <TabsList>
+          <TabsTrigger value="evidence">Evidence</TabsTrigger>
+          <TabsTrigger value="flow">Money Flow</TabsTrigger>
+          <TabsTrigger value="audit">Audit Log</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="evidence" className="flex flex-col gap-5 pt-4">
+          <RulesRow c={c} />
+          <section>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Exhibit List
+            </h3>
+            <ol className="space-y-1">
+              {c.evidence.map((e, i) => (
+                <li key={i} className="flex gap-3 px-3 py-2.5 text-sm leading-relaxed">
+                  <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    {exhibitLabel(i)}
+                  </span>
+                  <span className="text-foreground/90">{e}</span>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-3 rounded-2xl border-l-4 border-rule-border bg-rule-bg px-3 py-2 text-sm">
+              <span className="font-semibold text-foreground">Evaded rule:</span>{" "}
+              <span className="text-foreground/85">{c.evaded_rule}</span>
+            </div>
+          </section>
+        </TabsContent>
+
+        <TabsContent value="flow" className="pt-4">
+          <MoneyFlowTimeline c={c} />
+        </TabsContent>
+
+        <TabsContent value="audit" className="pt-4">
+          <AuditLogList entries={audit} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
 
+
 function AgentPipeline() {
+  const [expanded, setExpanded] = useState<string | null>("Finder");
   return (
     <div className="flex h-full flex-col">
       <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -565,9 +598,13 @@ function AgentPipeline() {
       <ol className="space-y-3">
         {AGENT_PIPELINE.map((a, i) => {
           const stats = AGENT_RULES[a.name];
+          const isOpen = expanded === a.name;
           return (
-            <li key={a.name} className="rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200">
-              <div className="flex items-center gap-2">
+            <li key={a.name} className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+              <button
+                onClick={() => setExpanded(isOpen ? null : a.name)}
+                className="flex w-full items-center gap-2 p-5 text-left"
+              >
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
@@ -575,23 +612,29 @@ function AgentPipeline() {
                 <span className="text-sm font-semibold text-foreground">
                   <Mono>{i + 1}.</Mono> {a.name}
                 </span>
-                <span className="ml-auto rounded-full bg-secondary px-2 py-0.5 text-[11px] uppercase tracking-wide text-success">
-                  done
+                <span
+                  className="ml-auto text-xs text-muted-foreground transition-transform"
+                  style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
+                >
+                  ▸
                 </span>
-              </div>
-
-              <p className="mt-1.5 text-sm leading-snug text-foreground/85">
+              </button>
+              <p className="px-5 pb-3 text-sm leading-snug text-foreground/85">
                 <span className="font-medium">{a.name}:</span> {a.summary}
               </p>
-              {stats && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {a.name}: <Mono>{stats.rules_executed}</Mono> detection rules executed ·{" "}
-                  <Mono>{stats.findings}</Mono> findings
-                </p>
+              {isOpen && (
+                <div className="px-5 pb-5">
+                  {stats && (
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      {a.name}: <Mono>{stats.rules_executed}</Mono> detection rules executed ·{" "}
+                      <Mono>{stats.findings}</Mono> findings
+                    </p>
+                  )}
+                  <p className="border-l-2 border-primary/40 bg-primary/5 px-2 py-1 text-xs italic leading-snug text-primary">
+                    {a.recall}
+                  </p>
+                </div>
               )}
-              <p className="mt-2 border-l-2 border-primary/40 bg-primary/5 px-2 py-1 text-xs italic leading-snug text-primary">
-                {a.recall}
-              </p>
             </li>
           );
         })}
@@ -599,6 +642,7 @@ function AgentPipeline() {
     </div>
   );
 }
+
 
 export function CaseDesk() {
   const sorted = useMemo(
@@ -647,8 +691,9 @@ export function CaseDesk() {
         <div className="grid h-full min-h-0 grid-cols-1 gap-5 lg:grid-cols-[36fr_40fr_24fr]">
           <section className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
             <div className="mb-2 shrink-0 px-1">
-              <SeverityBreakdownCard />
+              <SeverityBreakdownCollapsed />
             </div>
+
             <div className="mb-2 flex shrink-0 items-center justify-between px-1">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Case Queue

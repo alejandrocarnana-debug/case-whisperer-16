@@ -709,7 +709,7 @@ export function CaseDesk() {
 
       <main className="mx-auto w-full max-w-[1600px] flex-1 min-h-0 overflow-hidden px-6 py-5">
         <div className="grid h-full min-h-0 grid-cols-1 gap-5 lg:grid-cols-[36fr_40fr_24fr]">
-          <section className="flex h-full min-h-0 flex-col rounded-3xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
+          <section className="flex h-full min-h-0 flex-col rounded-3xl border border-border bg-surface-raised p-6 shadow-sm transition-all duration-200">
             <div className="mb-2 shrink-0 px-1">
               <SeverityBreakdownCollapsed />
             </div>

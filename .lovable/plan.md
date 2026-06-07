@@ -1,68 +1,61 @@
-## Plan — CaseDesk targeted updates
+## Plan — CaseDesk progressive-disclosure restructure
 
-Touches `src/components/CaseDesk.tsx` only. No data, styling-system, or other component changes.
+Single file: `src/components/CaseDesk.tsx`. No data, token, or functionality changes.
 
-### 1. Risk score by severity (helper)
-Add a single helper inside the file:
-```ts
-const riskColor = (n: number) =>
-  n >= 80 ? "text-severity-critical" : n >= 50 ? "text-severity-high" : "text-severity-review";
-```
+### 1. Case detail pane — strict vertical hierarchy (gap-6)
 
-### 2. Case detail — Risk Score block (top)
-Insert a new section at the very top of `CaseDetail`'s return, BEFORE `<RulesRow />` and the existing header block stays in place (still showing severity badge, status stamp, account id, exposure). New block:
-- Row: `<Mono className="text-5xl font-bold {riskColor(prob)}">RISK {prob}</Mono>` with `<span className="text-xl text-muted-foreground">/100</span>` aligned baseline.
-- Sub-line: `<Mono>{ci[0]}–{ci[1]}%</Mono> confidence` in `text-sm text-muted-foreground`.
-- Wrapped in a `<section>` flush with the existing detail padding; no card chrome, no border, no extra background — keeps the dossier feel.
-- `FraudBar` stays where it is (kept intentionally; only adding the prominent score above).
+Replace the current pile-up with three zones inside the existing `<CaseDetail>` scroll container:
 
-### 3. Case card — risk on the right
-In `CaseCard`, add a right-aligned bold risk number in the top row next to the status stamp, OR place it on its own column. Concretely: change the top row to put `[severity badge + account id]` on the left and a small right cluster containing the `StatusStamp` (existing) plus the risk score below it:
-```
-<div className="flex flex-col items-end gap-1">
-  <StatusStamp ... />
-  <Mono className={`text-xl font-bold ${riskColor(c.fraud_prob)}`}>{c.fraud_prob}</Mono>
-</div>
-```
-Also bump readability one step per spec #3 (see below).
+**a. Identity + Risk (top)**
+- Line 1: `<Mono>{c.account_id}</Mono>` (xl bold) + `<StatusStamp status={caseStatus} />` on the same row.
+- Line 2 (big): `RISK {prob} /100` (text-5xl bold mono, severity-colored).
+- Line 3: `{ci[0]}–{ci[1]}% confidence` (sm, muted).
+- Drop the old border-bottom header row (severity badge, exposure, reason) — that info now lives in the queue card and the tabs.
 
-### 4. Bigger queue + readability bump
-- Grid template: `lg:grid-cols-[36fr_40fr_24fr]` (was 30/45/25).
-- `CaseCard`: padding `p-5` → `p-6`; account id `text-xs` → `text-sm`; exposure `text-xl` → `text-2xl`; reason `text-sm` → `text-base`; SLA chip stays as-is (already comfortable) — keep.
+**b. Recommendation card (decision zone)**
+- One bordered, lightly tinted card (`rounded-2xl border-primary/20 bg-primary/5 p-5`).
+- Top line: `Recommended: {Escalate|Flag for Review|Dismiss} — {c.action_reason}` (label derived from existing `recommendedKey`).
+- Three action buttons directly inside the card on the next row: Escalate / Flag for Review / Dismiss. Keep current handlers, status-update behavior, audit append, and the matching-recommendation highlight ring.
+- Keep Download Report + "includes full audit log" — move it onto the same row, right-aligned, inside this card.
 
-### 5. Independent-scroll fix (queue + right rail)
-Root layout becomes a fixed-height shell so each rail scrolls on its own:
-- Wrap header + main in a `flex h-screen flex-col` container.
-- `<header>` shrinks naturally (`shrink-0`).
-- `<main>` becomes `flex-1 min-h-0 overflow-hidden`.
-- Inner grid: `h-full min-h-0`.
-- Left `<section>`: `flex h-full min-h-0 flex-col`; inside it, the breakdown card + queue header stay `shrink-0`; the case-list wrapper becomes `flex-1 min-h-0 overflow-y-auto` (drops the old `max-h-[calc(100vh-180px)]`).
-- Center `<section>`: `h-full min-h-0 overflow-hidden`; its inner `CaseDetail` already has `overflow-y-auto h-full`.
-- Right `<aside>`: `flex h-full min-h-0 flex-col overflow-y-auto` (drops the `lg:max-h-[…]` hack).
+**c. Tabs (Evidence / Money Flow / Audit Log)**
+- Use existing `@/components/ui/tabs` (Radix) — already in `src/components/ui/tabs.tsx`. No new deps.
+- `defaultValue="evidence"`, three `TabsTrigger`s.
+- **Evidence tab:** the existing `<RulesRow />` (triggered/evaded chips) + Exhibit List (current ordered list) + the existing yellow "Evaded rule:" callout. All borders on the inner exhibit list items REMOVED (per "remove borders inside cards" rule) — keep them as borderless rows with subtle bg or just padding/spacing.
+- **Money Flow tab:** existing `<MoneyFlowTimeline />` rendered inside; the inner timeline card keeps its outer border (it IS the card), but no nested borders added.
+- **Audit Log tab:** existing audit list, always-expanded inside the tab (drop the collapsible toggle since the tab itself controls visibility).
+- `<FraudBar />` is removed from the detail pane — the hero RISK score already conveys this; the bar was redundant clutter. (Confidence range still shows under RISK.)
 
-Result: header stays put, all three rails are self-scrolling, and every one of the 10 mock cases is reachable.
+Spacing: container becomes `flex h-full flex-col gap-6 overflow-y-auto`.
 
-### 6. Action buttons — Escalate / Flag for Review / Dismiss
-Replace the three (Approve / Dismiss / Escalate) buttons with:
-- **Escalate** — primary cobalt-violet pill (`bg-primary text-primary-foreground`)
-- **Flag for Review** — outline pill (`border bg-surface`)
-- **Dismiss** — ghost pill (no border, muted text, hover bg-accent)
+### 2. Queue cards — 3 lines + SLA in corner
+Rewrite `CaseCard` body to exactly:
+- Top-right corner: small SLA chip (`absolute top-3 right-3`, smaller padding/text). Severity left bar stays.
+- Line 1: `<Mono>{account_id}</Mono>` + bold risk score (right-aligned within line, severity-colored).
+- Line 2: bold exposure dollar amount + `<SeverityBadge />` right-aligned.
+- Line 3: one-line reason, `line-clamp-1` for safety.
+- Remove: existing StatusStamp from cards, the "exposure" label word, separate SLA row. Padding stays `p-6`.
 
-Keep `Download Report` and the "includes full audit log" text exactly as is.
+### 3. Left rail — collapsible Severity Breakdown
+Replace the current expanded `<SeverityBreakdownCard />` with a `<Collapsible>` (existing `@/components/ui/collapsible`) wrapping a single trigger row:
+- Trigger row: thin composite bar (8px tall, same three colors) + summary text "23 findings · 4 critical" + chevron.
+- Content: the existing breakdown rows (percentages + count labels) revealed on click.
+- Default closed. Internal borders dropped; outer rounded-2xl border + shadow-sm stays.
 
-Behavior:
-- Add local `caseStatus` state per selected case, seeded from `extras.case_status`. Reset when `c.id` changes (alongside the existing audit reset).
-- Mapping: Escalate → `ESCALATED`; Flag for Review → `UNDER REVIEW`; Dismiss → `CLEARED`.
-- Stamp shown in detail header reads from this local state instead of `extras.case_status`.
-- Audit appends:
-  - Escalate: `Analyst escalated ${c.account_id} — recommendation: ${c.recommended_action}`
-  - Flag: `Analyst flagged ${c.account_id} for review — ${c.action_reason}`
-  - Dismiss: `Analyst dismissed ${c.account_id} — no action taken`
-- Highlight matching recommendation: compute `recommendedKey` by keyword in `c.recommended_action.toLowerCase()`:
-  - contains "escalat" or "freeze" or "sar" → escalate
-  - contains "flag" or "review" or "hold" or "block" or "suspend" or "step-up" or "reverse" → flag
-  - else → dismiss
-  Apply `ring-2 ring-primary/40` to the matching button.
+### 4. Right rail — compact Agent Feed
+Rewrite `<AgentPipeline />`:
+- Local `useState<string | null>(expanded)` seeded to `"Finder"`.
+- Each agent card: name + status dot + one-line summary visible always. Click toggles expansion.
+- Expanded body shows: rules-count line + `⟲ Recalled from memory:` italic block — same content/markup as today, just gated.
+- Chevron indicator (rotated when open). No new card borders inside — outer rounded-2xl border stays as the only card chrome.
 
-### Out of scope
-Stat breakdown cards, agent pipeline content, money flow timeline, exhibits, audit log structure, Run Analysis button, Download Report, header, design tokens.
+### 5. Whitespace + border cleanup
+- `CaseDetail` root: `gap-6`.
+- Recommendation card: keep its outer border (it IS the card); no inner dividers.
+- Tabs content: `pt-4` spacing; no extra borders around panels.
+- Exhibit list items: drop `border border-border`, keep `bg-surface rounded-2xl shadow-sm` OR just spacing — pick the latter for less visual weight (`px-3 py-2.5` only).
+- Audit log items: borderless rows (current state).
+- AgentPipeline expanded content: borderless except for the existing left-border accent on the recall blockquote (that's content emphasis, keep).
+
+### Out of scope (untouched)
+Design tokens, breakdown segment data, agent content/strings, money flow timeline internals, action handlers' core behavior, layout shell scroll/sizing, header, stat chips, FindingsBySource card, Run Analysis, Download Report behavior (only its placement moves inside the recommendation card).

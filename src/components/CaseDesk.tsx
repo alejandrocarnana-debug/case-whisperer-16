@@ -138,7 +138,7 @@ function StatusStamp({ status, size = "md" }: { status: CaseStatus; size?: "sm" 
       : "px-2.5 py-1 text-[11px] tracking-[0.2em]";
   return (
     <span
-      className={`inline-flex select-none items-center rounded-sm border border-dashed font-semibold uppercase ${dims}`}
+      className={`inline-flex select-none items-center rounded-full border border-dashed font-semibold uppercase transition-all duration-200 ${dims}`}
       style={{
         color: c.fg,
         backgroundColor: c.bg,
@@ -154,12 +154,13 @@ function StatusStamp({ status, size = "md" }: { status: CaseStatus; size?: "sm" 
 function SeverityBadge({ s }: { s: Severity }) {
   return (
     <span
-      className={`inline-flex items-center rounded px-2 py-0.5 text-[11px] font-semibold tracking-wider ${severityStyles[s]}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wider transition-all duration-200 ${severityStyles[s]}`}
     >
       {s}
     </span>
   );
 }
+
 
 function StatChip({ value, label }: { value: string; label: string }) {
   return (

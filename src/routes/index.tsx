@@ -1,29 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { CaseDesk } from "@/components/CaseDesk";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "CaseDesk — Fraud Triage for Bank Analysts" },
+      { name: "description", content: "Analyst workbench for triaging flagged bank transactions: ranked cases, evidence, and recommended actions." },
+      { property: "og:title", content: "CaseDesk — Fraud Triage" },
+      { property: "og:description", content: "Triage flagged bank transactions with evidence and recommended actions." },
     ],
   }),
-  component: Index,
+  component: CaseDesk,
 });
-
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}

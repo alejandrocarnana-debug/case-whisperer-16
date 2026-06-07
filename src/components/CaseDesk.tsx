@@ -419,7 +419,10 @@ function CaseDetail({ c }: { c: Case }) {
           <span className="font-semibold text-ink">{recLabel[recKey]}</span>
           <span className="text-muted-foreground"> — {c.action_reason}</span>
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="relative my-4 h-px w-full" style={{ backgroundColor: "rgba(214,69,43,0.4)" }} aria-hidden>
+          <span className="absolute right-0 -top-[2.5px] block h-1.5 w-1.5 rounded-full bg-[#1B2B4B]" />
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onEscalate}
             className={`rounded-md bg-primary px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-primary-hover ${recRing("escalate")}`}

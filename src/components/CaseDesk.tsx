@@ -29,7 +29,7 @@ function BreakdownCard({
 }) {
   const total = segments.reduce((s, x) => s + x.count, 0);
   return (
-    <Card className="rounded-2xl border-border bg-surface shadow-sm transition-all duration-200">
+    <Card className="rounded-3xl border-border bg-surface shadow-sm transition-all duration-200">
       <CardHeader className="space-y-1 p-3 pb-2">
         <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
@@ -99,7 +99,7 @@ function SeverityBreakdownCollapsed() {
   const total = SEVERITY_SEGMENTS.reduce((s, x) => s + x.count, 0);
   const critical = SEVERITY_SEGMENTS[0].count;
   return (
-    <Collapsible className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+    <Collapsible className="rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
       <CollapsibleTrigger className="group flex w-full items-center gap-3 p-3 text-left">
         <div className="flex h-2 flex-1 overflow-hidden rounded-full bg-secondary">
           {SEVERITY_SEGMENTS.map((s) => (
@@ -397,7 +397,7 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         Money Flow Timeline
       </h3>
-      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+      <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
         <div className="relative px-4 pb-12 pt-5">
           <div className="flex items-center gap-1 overflow-x-auto pb-1">
             {nodes.map((n, i) => (
@@ -615,7 +615,7 @@ function AgentPipeline() {
           const stats = AGENT_RULES[a.name];
           const isOpen = expanded === a.name;
           return (
-            <li key={a.name} className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+            <li key={a.name} className="rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
               <button
                 onClick={() => setExpanded(isOpen ? null : a.name)}
                 className="flex w-full items-center gap-2 p-5 text-left"
@@ -708,7 +708,7 @@ export function CaseDesk() {
 
       <main className="mx-auto w-full max-w-[1600px] flex-1 min-h-0 overflow-hidden px-6 py-5">
         <div className="grid h-full min-h-0 grid-cols-1 gap-5 lg:grid-cols-[36fr_40fr_24fr]">
-          <section className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
+          <section className="flex h-full min-h-0 flex-col rounded-3xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
             <div className="mb-2 shrink-0 px-1">
               <SeverityBreakdownCollapsed />
             </div>
@@ -731,11 +731,11 @@ export function CaseDesk() {
             </div>
           </section>
 
-          <section className="h-full min-h-0 overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200">
+          <section className="h-full min-h-0 overflow-hidden rounded-3xl border border-border bg-surface p-6 shadow-sm transition-all duration-200">
             <CaseDetail c={selected} />
           </section>
 
-          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-2xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200">
+          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-3xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200">
             <div className="mb-3 shrink-0">
               <FindingsBySourceCard />
             </div>

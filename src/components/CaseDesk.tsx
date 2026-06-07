@@ -214,33 +214,39 @@ function CaseCard({
   return (
     <button
       onClick={onClick}
-      className={`relative w-full overflow-hidden rounded-2xl border bg-surface p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
+      className={`relative w-full overflow-hidden rounded-2xl border bg-surface p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
         active
           ? "border-l-2 border-l-primary border-border ring-1 ring-primary/20"
           : "border-border hover:border-foreground/20"
       }`}
     >
       <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]} ${active ? "opacity-0" : ""}`} />
-      <div className="flex items-start justify-between gap-2 pl-2">
+      <div className="flex items-start justify-between gap-3 pl-2">
         <div className="flex flex-wrap items-center gap-2">
           <SeverityBadge s={c.severity} />
-          <Mono className="text-xs text-muted-foreground">{c.account_id}</Mono>
+          <Mono className="text-sm text-muted-foreground">{c.account_id}</Mono>
         </div>
-        {extras && <StatusStamp status={extras.case_status} size="sm" />}
+        <div className="flex flex-col items-end gap-1">
+          {extras && <StatusStamp status={extras.case_status} size="sm" />}
+          <Mono className={`text-xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
+            {c.fraud_prob}
+          </Mono>
+        </div>
       </div>
-      <div className="mt-2 flex items-baseline justify-between gap-2 pl-2">
-        <Mono className="text-xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
+      <div className="mt-3 flex items-baseline justify-between gap-2 pl-2">
+        <Mono className="text-2xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
         <span className="text-[11px] uppercase tracking-wide text-muted-foreground">exposure</span>
       </div>
-      <p className="mt-1.5 pl-2 text-sm leading-snug text-foreground/85">{c.reason}</p>
+      <p className="mt-2 pl-2 text-base leading-snug text-foreground/85">{c.reason}</p>
       {extras && (
-        <div className="mt-2 pl-2">
+        <div className="mt-3 pl-2">
           <SlaChip hours={extras.sla_hours} />
         </div>
       )}
     </button>
   );
 }
+
 
 
 function FraudBar({ prob, ci }: { prob: number; ci: [number, number] }) {

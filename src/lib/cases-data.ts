@@ -1,5 +1,30 @@
 export type Severity = "CRITICAL" | "HIGH" | "REVIEW";
 
+export type PatternType = "structuring" | "ring" | "temporal" | "outlier";
+
+export interface StructuringChartData {
+  bins: { range: string; count: number; flagged: boolean }[];
+  threshold: number;
+}
+export interface RingChartData {
+  nodes: { id: string; angle: number }[];
+  edges: { from: string; to: string; amount: number }[];
+  selected_id?: string;
+}
+export interface TemporalChartData {
+  baseline: { hour: number }[];
+  flagged: { hour: number; amount: number }[];
+}
+export interface OutlierChartData {
+  population: { x: number; y: number }[];
+  flagged: { x: number; y: number; id: string };
+}
+export type ChartData =
+  | ({ kind: "structuring" } & StructuringChartData)
+  | ({ kind: "ring" } & RingChartData)
+  | ({ kind: "temporal" } & TemporalChartData)
+  | ({ kind: "outlier" } & OutlierChartData);
+
 export interface Case {
   id: string;
   account_id: string;
@@ -13,6 +38,8 @@ export interface Case {
   recommended_action: string;
   action_reason: string;
   status: string;
+  pattern_type?: PatternType;
+  chart_data?: ChartData;
 }
 
 export const CASES: Case[] = [
@@ -33,6 +60,39 @@ export const CASES: Case[] = [
     recommended_action: "Freeze account",
     action_reason: "hub of circular flow",
     status: "open",
+    pattern_type: "ring",
+    chart_data: {
+      kind: "ring",
+      selected_id: "ACC-4471",
+      nodes: [
+        { id: "ACC-4471", angle: 0 },
+        { id: "ACC-8821", angle: 30 },
+        { id: "ACC-3340", angle: 60 },
+        { id: "ACC-9912", angle: 90 },
+        { id: "ACC-2287", angle: 120 },
+        { id: "ACC-7104", angle: 150 },
+        { id: "ACC-5563", angle: 180 },
+        { id: "ACC-6620", angle: 210 },
+        { id: "ACC-3098", angle: 240 },
+        { id: "ACC-1142", angle: 270 },
+        { id: "ACC-8832", angle: 300 },
+        { id: "ACC-5510", angle: 330 },
+      ],
+      edges: [
+        { from: "ACC-4471", to: "ACC-8821", amount: 9400 },
+        { from: "ACC-8821", to: "ACC-3340", amount: 9550 },
+        { from: "ACC-3340", to: "ACC-9912", amount: 9700 },
+        { from: "ACC-9912", to: "ACC-2287", amount: 9450 },
+        { from: "ACC-2287", to: "ACC-7104", amount: 9600 },
+        { from: "ACC-7104", to: "ACC-5563", amount: 9800 },
+        { from: "ACC-5563", to: "ACC-6620", amount: 9500 },
+        { from: "ACC-6620", to: "ACC-3098", amount: 9650 },
+        { from: "ACC-3098", to: "ACC-1142", amount: 9400 },
+        { from: "ACC-1142", to: "ACC-8832", amount: 9550 },
+        { from: "ACC-8832", to: "ACC-5510", amount: 9700 },
+        { from: "ACC-5510", to: "ACC-4471", amount: 9450 },
+      ],
+    },
   },
   {
     id: "c2",
@@ -88,6 +148,21 @@ export const CASES: Case[] = [
     recommended_action: "Step-up authentication + freeze outbound",
     action_reason: "credential compromise likely",
     status: "open",
+    pattern_type: "temporal",
+    chart_data: {
+      kind: "temporal",
+      baseline: [
+        { hour: 8 }, { hour: 9 }, { hour: 9 }, { hour: 10 },
+        { hour: 11 }, { hour: 12 }, { hour: 13 }, { hour: 13 },
+        { hour: 14 }, { hour: 14 }, { hour: 15 }, { hour: 16 },
+        { hour: 16 }, { hour: 17 }, { hour: 18 }, { hour: 19 },
+        { hour: 20 }, { hour: 21 },
+      ],
+      flagged: [
+        { hour: 3, amount: 9400 },
+        { hour: 4, amount: 9650 },
+      ],
+    },
   } as Case,
   {
     id: "c5",
@@ -106,6 +181,21 @@ export const CASES: Case[] = [
     recommended_action: "File SAR + freeze",
     action_reason: "layering pattern with crypto off-ramp",
     status: "open",
+    pattern_type: "structuring",
+    chart_data: {
+      kind: "structuring",
+      threshold: 10000,
+      bins: [
+        { range: "7000–7500", count: 1, flagged: false },
+        { range: "7500–8000", count: 2, flagged: false },
+        { range: "8000–8500", count: 1, flagged: false },
+        { range: "8500–9000", count: 2, flagged: false },
+        { range: "9000–9500", count: 4, flagged: true },
+        { range: "9500–10000", count: 3, flagged: true },
+        { range: "10000–10500", count: 0, flagged: false },
+        { range: "10500–11000", count: 0, flagged: false },
+      ],
+    },
   },
   {
     id: "c6",
@@ -142,6 +232,14 @@ export const CASES: Case[] = [
     recommended_action: "Suspend credit line",
     action_reason: "synthetic identity indicators",
     status: "open",
+    pattern_type: "outlier",
+    chart_data: {
+      kind: "outlier",
+      flagged: { x: 9400, y: 14, id: "ACC-5563" },
+      population: [
+        {x:3192,y:4},{x:3228,y:3},{x:2383,y:3},{x:4834,y:4},{x:4744,y:4},{x:3973,y:4},{x:1500,y:5},{x:4107,y:4},{x:1470,y:1},{x:2432,y:3},{x:3866,y:3},{x:4125,y:2},{x:3870,y:4},{x:2706,y:6},{x:4167,y:5},{x:2755,y:2},{x:3087,y:3},{x:4258,y:4},{x:2963,y:2},{x:2875,y:5},{x:2530,y:4},{x:4011,y:1},{x:3558,y:6},{x:1082,y:3},{x:3372,y:2},{x:4096,y:3},{x:1742,y:5},{x:4303,y:5},{x:5228,y:4},{x:3643,y:1},{x:4238,y:3},{x:2956,y:1},{x:2338,y:3},{x:5046,y:1},{x:1750,y:4},{x:5232,y:4},{x:1220,y:1},{x:3928,y:2},{x:2156,y:5},{x:4822,y:4},{x:3794,y:4},{x:5412,y:4},{x:4122,y:4},{x:1618,y:6},{x:4646,y:4},{x:1131,y:2},{x:4510,y:1},{x:3279,y:5},{x:1926,y:6},{x:4162,y:3},{x:3889,y:5},{x:3644,y:5},{x:2706,y:3},{x:4750,y:4},{x:2443,y:5},{x:5258,y:3},{x:1844,y:3},{x:3321,y:3},{x:5185,y:2},{x:5012,y:1},{x:2555,y:5},{x:4854,y:5},{x:3914,y:4},{x:3682,y:4},{x:3288,y:4},{x:4187,y:4},{x:4416,y:4},{x:5912,y:4},{x:2986,y:3},{x:3484,y:5},{x:3096,y:4},{x:5704,y:1},{x:2151,y:4},{x:3978,y:4},{x:2982,y:5},{x:3838,y:3},{x:6416,y:4},{x:2834,y:3},{x:3229,y:3},{x:500,y:3},
+      ],
+    },
   },
   {
     id: "c8",

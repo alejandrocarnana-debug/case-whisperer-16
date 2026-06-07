@@ -576,7 +576,7 @@ export function CaseDesk() {
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition-all duration-200">
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2.2">
                 <path d="M3 4h18v4H3zM3 12h12v8H3zM18 12h3v8h-3z" strokeLinejoin="round" />
               </svg>
@@ -595,7 +595,7 @@ export function CaseDesk() {
               <StatChip value={HEADER_STATS.exposure} label="exposure" />
               <StatChip value={String(HEADER_STATS.ring_accounts)} label="ring accounts" />
             </div>
-            <button className="rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover">
+            <button className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md">
               Run Analysis
             </button>
           </div>
@@ -604,7 +604,7 @@ export function CaseDesk() {
 
       <main className="mx-auto max-w-[1600px] px-6 py-5">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[30fr_45fr_25fr]">
-          <section className="flex flex-col rounded-xl border border-border bg-surface-raised p-3">
+          <section className="flex flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
             <div className="mb-2 px-1">
               <SeverityBreakdownCard />
             </div>
@@ -614,7 +614,7 @@ export function CaseDesk() {
               </h2>
               <span className="text-[11px] text-muted-foreground">worst first</span>
             </div>
-            <div className="flex max-h-[calc(100vh-180px)] flex-col gap-2 overflow-y-auto pr-1">
+            <div className="flex max-h-[calc(100vh-180px)] flex-col gap-3 overflow-y-auto pr-1">
               {sorted.map((c) => (
                 <CaseCard
                   key={c.id}
@@ -626,16 +626,18 @@ export function CaseDesk() {
             </div>
           </section>
 
-          <section className="rounded-xl border border-border bg-surface p-5 lg:max-h-[calc(100vh-130px)]">
+          <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200 lg:max-h-[calc(100vh-130px)]">
             <CaseDetail c={selected} />
           </section>
 
-          <aside className="rounded-xl border border-border bg-surface-raised p-4 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto">
+          <aside className="rounded-2xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto">
             <div className="mb-3">
               <FindingsBySourceCard />
             </div>
             <AgentPipeline />
           </aside>
+
+
 
         </div>
       </main>

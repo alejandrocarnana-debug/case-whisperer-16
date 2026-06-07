@@ -126,6 +126,18 @@ const statusStampColor: Record<CaseStatus, { fg: string; bg: string }> = {
   ESCALATED: { fg: "var(--stamp-blue)", bg: "var(--stamp-blue-bg)" },
 };
 
+const riskColor = (n: number) =>
+  n >= 80 ? "text-severity-critical" : n >= 50 ? "text-severity-high" : "text-severity-review";
+
+type RecKey = "escalate" | "flag" | "dismiss";
+const recommendedKey = (rec: string): RecKey => {
+  const r = rec.toLowerCase();
+  if (/(escalat|freeze|sar)/.test(r)) return "escalate";
+  if (/(flag|review|hold|block|suspend|step-up|reverse)/.test(r)) return "flag";
+  return "dismiss";
+};
+
+
 function Mono({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <span className={`num ${className}`}>{children}</span>;
 }
@@ -202,33 +214,39 @@ function CaseCard({
   return (
     <button
       onClick={onClick}
-      className={`relative w-full overflow-hidden rounded-2xl border bg-surface p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
+      className={`relative w-full overflow-hidden rounded-2xl border bg-surface p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
         active
           ? "border-l-2 border-l-primary border-border ring-1 ring-primary/20"
           : "border-border hover:border-foreground/20"
       }`}
     >
       <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]} ${active ? "opacity-0" : ""}`} />
-      <div className="flex items-start justify-between gap-2 pl-2">
+      <div className="flex items-start justify-between gap-3 pl-2">
         <div className="flex flex-wrap items-center gap-2">
           <SeverityBadge s={c.severity} />
-          <Mono className="text-xs text-muted-foreground">{c.account_id}</Mono>
+          <Mono className="text-sm text-muted-foreground">{c.account_id}</Mono>
         </div>
-        {extras && <StatusStamp status={extras.case_status} size="sm" />}
+        <div className="flex flex-col items-end gap-1">
+          {extras && <StatusStamp status={extras.case_status} size="sm" />}
+          <Mono className={`text-xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
+            {c.fraud_prob}
+          </Mono>
+        </div>
       </div>
-      <div className="mt-2 flex items-baseline justify-between gap-2 pl-2">
-        <Mono className="text-xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
+      <div className="mt-3 flex items-baseline justify-between gap-2 pl-2">
+        <Mono className="text-2xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
         <span className="text-[11px] uppercase tracking-wide text-muted-foreground">exposure</span>
       </div>
-      <p className="mt-1.5 pl-2 text-sm leading-snug text-foreground/85">{c.reason}</p>
+      <p className="mt-2 pl-2 text-base leading-snug text-foreground/85">{c.reason}</p>
       {extras && (
-        <div className="mt-2 pl-2">
+        <div className="mt-3 pl-2">
           <SlaChip hours={extras.sla_hours} />
         </div>
       )}
     </button>
   );
 }
+
 
 
 function FraudBar({ prob, ci }: { prob: number; ci: [number, number] }) {
@@ -403,34 +421,56 @@ function CaseDetail({ c }: { c: Case }) {
   const extras = CASE_EXTRAS[c.id];
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [auditOpen, setAuditOpen] = useState(true);
+  const [caseStatus, setCaseStatus] = useState<CaseStatus | undefined>(extras?.case_status);
 
-  // Reset audit log when switching cases.
+  // Reset audit log + status when switching cases.
   useEffect(() => {
     setAudit([...(extras?.audit_seed ?? [])].reverse());
+    setCaseStatus(extras?.case_status);
   }, [c.id, extras]);
 
   const append = (text: string) =>
     setAudit((prev) => [{ time: nowStamp(), text }, ...prev]);
 
-  const onApprove = () =>
+  const onEscalate = () => {
+    setCaseStatus("ESCALATED");
     append(
-      `Analyst approved ${c.recommended_action.toUpperCase()} on ${c.account_id} — reason: ${c.action_reason}`,
+      `Analyst escalated ${c.account_id} — recommendation: ${c.recommended_action}`,
     );
-  const onDismiss = () =>
-    append(`Analyst dismissed case on ${c.account_id} — no action taken`);
-  const onEscalate = () =>
-    append(`Analyst escalated ${c.account_id} to Tier-2 review`);
+  };
+  const onFlag = () => {
+    setCaseStatus("UNDER REVIEW");
+    append(`Analyst flagged ${c.account_id} for review — ${c.action_reason}`);
+  };
+  const onDismiss = () => {
+    setCaseStatus("CLEARED");
+    append(`Analyst dismissed ${c.account_id} — no action taken`);
+  };
   const onDownload = () =>
     append(
       `Analyst downloaded full case report for ${c.account_id} (PDF) — audit log included`,
     );
 
+  const recKey = recommendedKey(c.recommended_action);
+  const rec = (k: RecKey) =>
+    recKey === k ? "ring-2 ring-primary/40" : "";
+
   return (
     <div className="flex h-full flex-col gap-5 overflow-y-auto">
+      <section className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <Mono className={`text-5xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
+          RISK {c.fraud_prob}
+        </Mono>
+        <span className="text-xl text-muted-foreground">/100</span>
+        <div className="basis-full text-sm text-muted-foreground">
+          <Mono>{c.fraud_ci[0]}–{c.fraud_ci[1]}%</Mono> confidence
+        </div>
+      </section>
+
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
         <div className="flex flex-wrap items-center gap-3">
           <SeverityBadge s={c.severity} />
-          {extras && <StatusStamp status={extras.case_status} />}
+          {caseStatus && <StatusStamp status={caseStatus} />}
           <Mono className="text-xl font-semibold text-foreground">{c.account_id}</Mono>
           <span className="text-sm text-muted-foreground">·</span>
           <span className="text-sm text-foreground/80">{c.reason}</span>
@@ -480,23 +520,24 @@ function CaseDetail({ c }: { c: Case }) {
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={onApprove}
-            className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md"
-          >
-            Approve Action
-          </button>
-          <button
-            onClick={onDismiss}
-            className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
-          >
-            Dismiss
-          </button>
-          <button
             onClick={onEscalate}
-            className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
+            className={`rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md ${rec("escalate")}`}
           >
             Escalate
           </button>
+          <button
+            onClick={onFlag}
+            className={`rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md ${rec("flag")}`}
+          >
+            Flag for Review
+          </button>
+          <button
+            onClick={onDismiss}
+            className={`rounded-full px-5 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground ${rec("dismiss")}`}
+          >
+            Dismiss
+          </button>
+
           <div className="ml-auto flex items-center gap-2">
             <span className="text-[11px] text-muted-foreground">includes full audit log</span>
             <button
@@ -572,8 +613,8 @@ export function CaseDesk() {
   const selected = sorted.find((c) => c.id === selectedId) ?? sorted[0];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="border-b border-border bg-surface">
+    <div className="flex h-screen flex-col bg-background text-foreground">
+      <header className="shrink-0 border-b border-border bg-surface">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition-all duration-200">
@@ -602,19 +643,19 @@ export function CaseDesk() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1600px] px-6 py-5">
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-[30fr_45fr_25fr]">
-          <section className="flex flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
-            <div className="mb-2 px-1">
+      <main className="mx-auto w-full max-w-[1600px] flex-1 min-h-0 overflow-hidden px-6 py-5">
+        <div className="grid h-full min-h-0 grid-cols-1 gap-5 lg:grid-cols-[36fr_40fr_24fr]">
+          <section className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
+            <div className="mb-2 shrink-0 px-1">
               <SeverityBreakdownCard />
             </div>
-            <div className="mb-2 flex items-center justify-between px-1">
+            <div className="mb-2 flex shrink-0 items-center justify-between px-1">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Case Queue
               </h2>
               <span className="text-[11px] text-muted-foreground">worst first</span>
             </div>
-            <div className="flex max-h-[calc(100vh-180px)] flex-col gap-3 overflow-y-auto pr-1">
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1">
               {sorted.map((c) => (
                 <CaseCard
                   key={c.id}
@@ -626,16 +667,17 @@ export function CaseDesk() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200 lg:max-h-[calc(100vh-130px)]">
+          <section className="h-full min-h-0 overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200">
             <CaseDetail c={selected} />
           </section>
 
-          <aside className="rounded-2xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto">
-            <div className="mb-3">
+          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-2xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200">
+            <div className="mb-3 shrink-0">
               <FindingsBySourceCard />
             </div>
             <AgentPipeline />
           </aside>
+
 
 
 

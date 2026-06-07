@@ -31,6 +31,9 @@
   --color-ring: var(--ring);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
+  --color-ink: var(--ink);
+  --color-header-bg: var(--header-bg);
+  --color-blush: var(--blush);
 
   --color-severity-critical: var(--severity-critical);
   --color-severity-critical-bg: var(--severity-critical-bg);
@@ -47,37 +50,42 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+
 :root {
   --radius: 1.25rem;
 
-  /* Off-white canvas, near-black ink */
-  --background: oklch(0.985 0 0);              /* ~#FAFAFA */
-  --foreground: oklch(0.16 0 0);               /* ~#0A0A0A */
+  /* Warm off-white canvas (Klarna), ink text */
+  --background: oklch(0.972 0.006 75);         /* ~#FAF7F2 warm off-white */
+  --foreground: oklch(0.18 0.005 270);         /* ~#0E0E0F ink */
+  --ink: oklch(0.18 0.005 270);
   --surface: oklch(1 0 0);                     /* #FFFFFF */
   --surface-raised: oklch(1 0 0);
+  --header-bg: oklch(0.18 0.006 270);          /* ~#0F1115 near-black */
+  --blush: oklch(0.965 0.018 15);              /* ~#FFF1F4 soft blush */
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0 0);
+  --card-foreground: oklch(0.18 0.005 270);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0 0);
+  --popover-foreground: oklch(0.18 0.005 270);
 
   /* Cobalt-violet primary #494FDF */
   --primary: oklch(0.515 0.225 273);
   --primary-foreground: oklch(0.99 0 0);
   --primary-hover: oklch(0.455 0.225 273);
 
-  --secondary: oklch(0.968 0 0);
-  --secondary-foreground: oklch(0.16 0 0);
-  --muted: oklch(0.968 0 0);
-  --muted-foreground: oklch(0.42 0 0);         /* ~#525252 */
-  --accent: oklch(0.955 0 0);
-  --accent-foreground: oklch(0.16 0 0);
+  --secondary: oklch(0.955 0.006 75);
+  --secondary-foreground: oklch(0.18 0.005 270);
+  --muted: oklch(0.955 0.006 75);
+  --muted-foreground: oklch(0.46 0.008 285);   /* warm gray ~#5A5A5F */
+  --accent: oklch(0.945 0.008 75);
+  --accent-foreground: oklch(0.18 0.005 270);
 
   --destructive: oklch(0.55 0.22 27);
   --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.918 0 0);                  /* ~#E5E5E5 */
-  --input: oklch(0.918 0 0);
+  --border: oklch(0.915 0.01 75);              /* warm ~#EBE7E0 */
+  --input: oklch(0.915 0.01 75);
   --ring: oklch(0.515 0.225 273);
+
 
   /* Severity (unchanged — functional) */
   --severity-critical: oklch(0.50 0.22 27);

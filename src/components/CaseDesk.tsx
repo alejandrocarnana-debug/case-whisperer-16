@@ -29,7 +29,7 @@ function BreakdownCard({
 }) {
   const total = segments.reduce((s, x) => s + x.count, 0);
   return (
-    <Card className="rounded-2xl border-border bg-surface shadow-sm transition-all duration-200">
+    <Card className="rounded-3xl border-border bg-surface shadow-sm transition-all duration-200">
       <CardHeader className="space-y-1 p-3 pb-2">
         <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
@@ -99,7 +99,7 @@ function SeverityBreakdownCollapsed() {
   const total = SEVERITY_SEGMENTS.reduce((s, x) => s + x.count, 0);
   const critical = SEVERITY_SEGMENTS[0].count;
   return (
-    <Collapsible className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+    <Collapsible className="rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
       <CollapsibleTrigger className="group flex w-full items-center gap-3 p-3 text-left">
         <div className="flex h-2 flex-1 overflow-hidden rounded-full bg-secondary">
           {SEVERITY_SEGMENTS.map((s) => (
@@ -234,12 +234,22 @@ function SeverityBadge({ s }: { s: Severity }) {
 
 function StatChip({ value, label }: { value: string; label: string }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-border bg-surface px-4 py-2.5 shadow-sm transition-all duration-200">
+    <div className="flex flex-col rounded-3xl border border-border bg-surface px-4 py-2.5 shadow-sm transition-all duration-200">
       <Mono className="text-3xl font-bold tracking-tight text-foreground leading-none">{value}</Mono>
       <span className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">{label}</span>
     </div>
   );
 }
+
+function HeaderStatChip({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="flex flex-col px-3 leading-none">
+      <Mono className="text-2xl font-bold tracking-tight text-white leading-none">{value}</Mono>
+      <span className="mt-1 text-[11px] uppercase tracking-wider text-white/60">{label}</span>
+    </div>
+  );
+}
+
 
 function SlaChip({ hours }: { hours: number }) {
   const urgent = hours < 24;
@@ -272,13 +282,14 @@ function CaseCard({
   return (
     <button
       onClick={onClick}
-      className={`relative w-full overflow-hidden rounded-2xl border bg-surface p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
+      className={`relative w-full overflow-hidden rounded-3xl border bg-surface p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
         active
-          ? "border-l-2 border-l-primary border-border ring-1 ring-primary/20"
+          ? "border-border before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary before:content-['']"
           : "border-border hover:border-foreground/20"
       }`}
     >
       <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]} ${active ? "opacity-0" : ""}`} />
+
       {extras && (
         <span className="absolute right-3 top-3">
           <span
@@ -384,9 +395,9 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
   return (
     <section>
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Money Flow Timeline
+        Money flow timeline
       </h3>
-      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+      <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
         <div className="relative px-4 pb-12 pt-5">
           <div className="flex items-center gap-1 overflow-x-auto pb-1">
             {nodes.map((n, i) => (
@@ -508,15 +519,18 @@ function CaseDetail({ c }: { c: Case }) {
       </section>
 
       {/* 2. Recommendation card — decision zone */}
-      <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
-        <p className="mb-4 text-sm text-foreground/85">
-          <span className="font-semibold text-foreground">Recommended: {recLabel[recKey]}</span>
+      <section className="rounded-3xl border border-border bg-[color:var(--color-blush)] p-6 text-ink shadow-sm transition-all duration-200">
+        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Recommended next step
+        </p>
+        <p className="mb-4 text-sm text-ink/85">
+          <span className="font-semibold text-ink">{recLabel[recKey]}</span>
           <span className="text-muted-foreground"> — {c.action_reason}</span>
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onEscalate}
-            className={`rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md ${rec("escalate")}`}
+            className={`rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md ${rec("escalate")}`}
           >
             Escalate
           </button>
@@ -524,7 +538,7 @@ function CaseDetail({ c }: { c: Case }) {
             onClick={onFlag}
             className={`rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md ${rec("flag")}`}
           >
-            Flag for Review
+            Flag for review
           </button>
           <button
             onClick={onDismiss}
@@ -533,12 +547,12 @@ function CaseDetail({ c }: { c: Case }) {
             Dismiss
           </button>
           <div className="ml-auto flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground">includes full audit log</span>
+            <span className="text-[11px] text-muted-foreground">Report ready to download</span>
             <button
               onClick={onDownload}
               className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
             >
-              Download Report
+              Download report
             </button>
           </div>
         </div>
@@ -546,11 +560,12 @@ function CaseDetail({ c }: { c: Case }) {
 
       {/* 3. Tabs */}
       <Tabs defaultValue="evidence" className="w-full">
-        <TabsList>
-          <TabsTrigger value="evidence">Evidence</TabsTrigger>
-          <TabsTrigger value="flow">Money Flow</TabsTrigger>
-          <TabsTrigger value="audit">Audit Log</TabsTrigger>
+        <TabsList className="rounded-full bg-secondary p-1">
+          <TabsTrigger value="evidence" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Evidence</TabsTrigger>
+          <TabsTrigger value="flow" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Money flow</TabsTrigger>
+          <TabsTrigger value="audit" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Audit log</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="evidence" className="flex flex-col gap-5 pt-4">
           <RulesRow c={c} />
@@ -600,15 +615,16 @@ function AgentPipeline() {
           const stats = AGENT_RULES[a.name];
           const isOpen = expanded === a.name;
           return (
-            <li key={a.name} className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+            <li key={a.name} className="rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
               <button
                 onClick={() => setExpanded(isOpen ? null : a.name)}
                 className="flex w-full items-center gap-2 p-5 text-left"
               >
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                 </span>
+
                 <span className="text-sm font-semibold text-foreground">
                   <Mono>{i + 1}.</Mono> {a.name}
                 </span>
@@ -658,7 +674,7 @@ export function CaseDesk() {
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="shrink-0 border-b border-border bg-surface">
+      <header className="relative shrink-0 bg-[color:var(--color-header-bg)] text-white">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition-all duration-200">
@@ -667,8 +683,10 @@ export function CaseDesk() {
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-semibold leading-tight tracking-tight">CaseDesk</h1>
-              <p className="text-xs leading-tight text-muted-foreground">
+              <h1 className="text-xl font-bold leading-tight tracking-tight text-white">
+                CASE<span className="text-primary">/</span>DESK
+              </h1>
+              <p className="text-xs leading-tight text-white/60">
                 <Mono>5,000</Mono> real bank transactions analyzed · findings verifiable against event benchmark
               </p>
             </div>
@@ -676,20 +694,22 @@ export function CaseDesk() {
 
           <div className="ml-auto flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <StatChip value={String(HEADER_STATS.flagged)} label="cases flagged" />
-              <StatChip value={HEADER_STATS.exposure} label="exposure" />
-              <StatChip value={String(HEADER_STATS.ring_accounts)} label="ring accounts" />
+              <HeaderStatChip value={String(HEADER_STATS.flagged)} label="cases flagged" />
+              <HeaderStatChip value={HEADER_STATS.exposure} label="exposure" />
+              <HeaderStatChip value={String(HEADER_STATS.ring_accounts)} label="ring accounts" />
             </div>
-            <button className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md">
-              Run Analysis
+            <button className="rounded-full bg-primary px-7 py-3 text-sm font-bold text-white shadow-md transition-all duration-200 hover:bg-primary-hover hover:shadow-lg">
+              Run analysis
             </button>
           </div>
         </div>
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-primary to-transparent" />
       </header>
+
 
       <main className="mx-auto w-full max-w-[1600px] flex-1 min-h-0 overflow-hidden px-6 py-5">
         <div className="grid h-full min-h-0 grid-cols-1 gap-5 lg:grid-cols-[36fr_40fr_24fr]">
-          <section className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
+          <section className="flex h-full min-h-0 flex-col rounded-3xl border border-border bg-surface-raised p-6 shadow-sm transition-all duration-200">
             <div className="mb-2 shrink-0 px-1">
               <SeverityBreakdownCollapsed />
             </div>
@@ -712,11 +732,11 @@ export function CaseDesk() {
             </div>
           </section>
 
-          <section className="h-full min-h-0 overflow-hidden rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200">
+          <section className="h-full min-h-0 overflow-hidden rounded-3xl border border-border bg-surface p-6 shadow-sm transition-all duration-200">
             <CaseDetail c={selected} />
           </section>
 
-          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-2xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200">
+          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-3xl border border-border bg-surface-raised p-6 shadow-sm transition-all duration-200">
             <div className="mb-3 shrink-0">
               <FindingsBySourceCard />
             </div>

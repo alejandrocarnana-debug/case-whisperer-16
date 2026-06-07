@@ -658,7 +658,7 @@ export function CaseDesk() {
 
   return (
     <div className="flex h-screen flex-col bg-background text-foreground">
-      <header className="shrink-0 border-b border-border bg-surface">
+      <header className="relative shrink-0 bg-[color:var(--color-header-bg)] text-white">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition-all duration-200">
@@ -667,8 +667,10 @@ export function CaseDesk() {
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-semibold leading-tight tracking-tight">CaseDesk</h1>
-              <p className="text-xs leading-tight text-muted-foreground">
+              <h1 className="text-xl font-bold leading-tight tracking-tight text-white">
+                CASE<span className="text-primary">/</span>DESK
+              </h1>
+              <p className="text-xs leading-tight text-white/60">
                 <Mono>5,000</Mono> real bank transactions analyzed · findings verifiable against event benchmark
               </p>
             </div>
@@ -676,16 +678,18 @@ export function CaseDesk() {
 
           <div className="ml-auto flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <StatChip value={String(HEADER_STATS.flagged)} label="cases flagged" />
-              <StatChip value={HEADER_STATS.exposure} label="exposure" />
-              <StatChip value={String(HEADER_STATS.ring_accounts)} label="ring accounts" />
+              <HeaderStatChip value={String(HEADER_STATS.flagged)} label="cases flagged" />
+              <HeaderStatChip value={HEADER_STATS.exposure} label="exposure" />
+              <HeaderStatChip value={String(HEADER_STATS.ring_accounts)} label="ring accounts" />
             </div>
-            <button className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md">
-              Run Analysis
+            <button className="rounded-full bg-primary px-7 py-3 text-sm font-bold text-white shadow-md transition-all duration-200 hover:bg-primary-hover hover:shadow-lg">
+              Run analysis
             </button>
           </div>
         </div>
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-primary to-transparent" />
       </header>
+
 
       <main className="mx-auto w-full max-w-[1600px] flex-1 min-h-0 overflow-hidden px-6 py-5">
         <div className="grid h-full min-h-0 grid-cols-1 gap-5 lg:grid-cols-[36fr_40fr_24fr]">

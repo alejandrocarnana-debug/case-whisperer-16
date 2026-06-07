@@ -10,6 +10,7 @@ import {
 } from "@/lib/cases-extras";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { EvidenceChart } from "@/components/EvidenceChart";
 
 
 interface BreakdownSegment {
@@ -495,6 +496,7 @@ function CaseDetail({ c }: { c: Case }) {
               <span className="text-ink">{c.evaded_rule}</span>
             </div>
           </section>
+          <EvidenceChart c={c} />
         </TabsContent>
 
         <TabsContent value="flow" className="pt-4">

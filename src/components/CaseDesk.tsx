@@ -691,8 +691,9 @@ export function CaseDesk() {
         <div className="grid h-full min-h-0 grid-cols-1 gap-5 lg:grid-cols-[36fr_40fr_24fr]">
           <section className="flex h-full min-h-0 flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
             <div className="mb-2 shrink-0 px-1">
-              <SeverityBreakdownCard />
+              <SeverityBreakdownCollapsed />
             </div>
+
             <div className="mb-2 flex shrink-0 items-center justify-between px-1">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Case Queue

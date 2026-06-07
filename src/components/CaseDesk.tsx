@@ -534,6 +534,7 @@ function CaseDetail({ c }: { c: Case }) {
 
 
 function AgentPipeline() {
+  const [expanded, setExpanded] = useState<string | null>("Finder");
   return (
     <div className="flex h-full flex-col">
       <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -542,9 +543,13 @@ function AgentPipeline() {
       <ol className="space-y-3">
         {AGENT_PIPELINE.map((a, i) => {
           const stats = AGENT_RULES[a.name];
+          const isOpen = expanded === a.name;
           return (
-            <li key={a.name} className="rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200">
-              <div className="flex items-center gap-2">
+            <li key={a.name} className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+              <button
+                onClick={() => setExpanded(isOpen ? null : a.name)}
+                className="flex w-full items-center gap-2 p-5 text-left"
+              >
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
@@ -552,23 +557,29 @@ function AgentPipeline() {
                 <span className="text-sm font-semibold text-foreground">
                   <Mono>{i + 1}.</Mono> {a.name}
                 </span>
-                <span className="ml-auto rounded-full bg-secondary px-2 py-0.5 text-[11px] uppercase tracking-wide text-success">
-                  done
+                <span
+                  className="ml-auto text-xs text-muted-foreground transition-transform"
+                  style={{ transform: isOpen ? "rotate(90deg)" : "rotate(0deg)" }}
+                >
+                  ▸
                 </span>
-              </div>
-
-              <p className="mt-1.5 text-sm leading-snug text-foreground/85">
+              </button>
+              <p className="px-5 pb-3 text-sm leading-snug text-foreground/85">
                 <span className="font-medium">{a.name}:</span> {a.summary}
               </p>
-              {stats && (
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {a.name}: <Mono>{stats.rules_executed}</Mono> detection rules executed ·{" "}
-                  <Mono>{stats.findings}</Mono> findings
-                </p>
+              {isOpen && (
+                <div className="px-5 pb-5">
+                  {stats && (
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      {a.name}: <Mono>{stats.rules_executed}</Mono> detection rules executed ·{" "}
+                      <Mono>{stats.findings}</Mono> findings
+                    </p>
+                  )}
+                  <p className="border-l-2 border-primary/40 bg-primary/5 px-2 py-1 text-xs italic leading-snug text-primary">
+                    {a.recall}
+                  </p>
+                </div>
               )}
-              <p className="mt-2 border-l-2 border-primary/40 bg-primary/5 px-2 py-1 text-xs italic leading-snug text-primary">
-                {a.recall}
-              </p>
             </li>
           );
         })}
@@ -576,6 +587,7 @@ function AgentPipeline() {
     </div>
   );
 }
+
 
 export function CaseDesk() {
   const sorted = useMemo(

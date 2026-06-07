@@ -224,31 +224,36 @@ function CaseCard({
       }`}
     >
       <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]} ${active ? "opacity-0" : ""}`} />
-      <div className="flex items-start justify-between gap-3 pl-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <SeverityBadge s={c.severity} />
+      {extras && (
+        <span className="absolute right-3 top-3">
+          <span
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] ${
+              extras.sla_hours < 24
+                ? "border-severity-critical/30 bg-severity-critical-bg text-severity-critical"
+                : "border-border bg-secondary text-muted-foreground"
+            }`}
+          >
+            <Mono className="font-semibold">{extras.sla_hours}h</Mono>
+          </span>
+        </span>
+      )}
+      <div className="flex flex-col gap-2 pl-2 pr-12">
+        <div className="flex items-center justify-between gap-3">
           <Mono className="text-sm text-muted-foreground">{c.account_id}</Mono>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          {extras && <StatusStamp status={extras.case_status} size="sm" />}
           <Mono className={`text-xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
             {c.fraud_prob}
           </Mono>
         </div>
-      </div>
-      <div className="mt-3 flex items-baseline justify-between gap-2 pl-2">
-        <Mono className="text-2xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
-        <span className="text-[11px] uppercase tracking-wide text-muted-foreground">exposure</span>
-      </div>
-      <p className="mt-2 pl-2 text-base leading-snug text-foreground/85">{c.reason}</p>
-      {extras && (
-        <div className="mt-3 pl-2">
-          <SlaChip hours={extras.sla_hours} />
+        <div className="flex items-center justify-between gap-3">
+          <Mono className="text-2xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
+          <SeverityBadge s={c.severity} />
         </div>
-      )}
+        <p className="line-clamp-1 text-base leading-snug text-foreground/85">{c.reason}</p>
+      </div>
     </button>
   );
 }
+
 
 
 

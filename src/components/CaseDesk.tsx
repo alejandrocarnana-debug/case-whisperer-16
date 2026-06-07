@@ -525,7 +525,7 @@ function AgentPipeline() {
         {AGENT_PIPELINE.map((a, i) => {
           const stats = AGENT_RULES[a.name];
           return (
-            <li key={a.name} className="rounded-lg border border-border bg-surface p-3">
+            <li key={a.name} className="rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
@@ -534,10 +534,11 @@ function AgentPipeline() {
                 <span className="text-sm font-semibold text-foreground">
                   <Mono>{i + 1}.</Mono> {a.name}
                 </span>
-                <span className="ml-auto text-[11px] uppercase tracking-wide text-success">
+                <span className="ml-auto rounded-full bg-secondary px-2 py-0.5 text-[11px] uppercase tracking-wide text-success">
                   done
                 </span>
               </div>
+
               <p className="mt-1.5 text-sm leading-snug text-foreground/85">
                 <span className="font-medium">{a.name}:</span> {a.summary}
               </p>

@@ -481,19 +481,19 @@ function CaseDetail({ c }: { c: Case }) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onApprove}
-            className="rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
+            className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md"
           >
             Approve Action
           </button>
           <button
             onClick={onDismiss}
-            className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
           >
             Dismiss
           </button>
           <button
             onClick={onEscalate}
-            className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
           >
             Escalate
           </button>
@@ -501,12 +501,13 @@ function CaseDetail({ c }: { c: Case }) {
             <span className="text-[11px] text-muted-foreground">includes full audit log</span>
             <button
               onClick={onDownload}
-              className="rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
             >
               Download Report
             </button>
           </div>
         </div>
+
       </section>
 
       <AuditLog entries={audit} open={auditOpen} onToggle={() => setAuditOpen((v) => !v)} />

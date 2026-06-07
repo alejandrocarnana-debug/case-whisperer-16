@@ -451,7 +451,7 @@ function CaseDetail({ c }: { c: Case }) {
           {c.evidence.map((e, i) => (
             <li
               key={i}
-              className="flex gap-3 rounded-md border border-border bg-surface px-3 py-2.5 text-sm leading-relaxed"
+              className="flex gap-3 rounded-2xl border border-border bg-surface px-3 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-200"
             >
               <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 {exhibitLabel(i)}
@@ -460,10 +460,11 @@ function CaseDetail({ c }: { c: Case }) {
             </li>
           ))}
         </ol>
-        <div className="mt-3 rounded-md border-l-4 border-rule-border bg-rule-bg px-3 py-2 text-sm">
+        <div className="mt-3 rounded-2xl border-l-4 border-rule-border bg-rule-bg px-3 py-2 text-sm">
           <span className="font-semibold text-foreground">Evaded rule:</span>{" "}
           <span className="text-foreground/85">{c.evaded_rule}</span>
         </div>
+
       </section>
 
       <MoneyFlowTimeline c={c} />

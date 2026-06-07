@@ -395,7 +395,7 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
   return (
     <section>
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Money Flow Timeline
+        Money flow timeline
       </h3>
       <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm transition-all duration-200">
         <div className="relative px-4 pb-12 pt-5">

@@ -1,5 +1,30 @@
 export type Severity = "CRITICAL" | "HIGH" | "REVIEW";
 
+export type PatternType = "structuring" | "ring" | "temporal" | "outlier";
+
+export interface StructuringChartData {
+  bins: { range: string; count: number; flagged: boolean }[];
+  threshold: number;
+}
+export interface RingChartData {
+  nodes: { id: string; angle: number }[];
+  edges: { from: string; to: string; amount: number }[];
+  selected_id?: string;
+}
+export interface TemporalChartData {
+  baseline: { hour: number }[];
+  flagged: { hour: number; amount: number }[];
+}
+export interface OutlierChartData {
+  population: { x: number; y: number }[];
+  flagged: { x: number; y: number; id: string };
+}
+export type ChartData =
+  | ({ kind: "structuring" } & StructuringChartData)
+  | ({ kind: "ring" } & RingChartData)
+  | ({ kind: "temporal" } & TemporalChartData)
+  | ({ kind: "outlier" } & OutlierChartData);
+
 export interface Case {
   id: string;
   account_id: string;
@@ -13,6 +38,8 @@ export interface Case {
   recommended_action: string;
   action_reason: string;
   status: string;
+  pattern_type?: PatternType;
+  chart_data?: ChartData;
 }
 
 export const CASES: Case[] = [

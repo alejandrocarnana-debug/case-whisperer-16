@@ -282,13 +282,14 @@ function CaseCard({
   return (
     <button
       onClick={onClick}
-      className={`relative w-full overflow-hidden rounded-2xl border bg-surface p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
+      className={`relative w-full overflow-hidden rounded-3xl border bg-surface p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
         active
-          ? "border-l-2 border-l-primary border-border ring-1 ring-primary/20"
+          ? "border-border before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary before:content-['']"
           : "border-border hover:border-foreground/20"
       }`}
     >
       <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]} ${active ? "opacity-0" : ""}`} />
+
       {extras && (
         <span className="absolute right-3 top-3">
           <span

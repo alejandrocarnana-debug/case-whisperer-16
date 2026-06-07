@@ -598,6 +598,9 @@ export function CaseDesk() {
       <main className="mx-auto max-w-[1600px] px-6 py-5">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[30fr_45fr_25fr]">
           <section className="flex flex-col rounded-xl border border-border bg-surface-raised p-3">
+            <div className="mb-2 px-1">
+              <SeverityBreakdownCard />
+            </div>
             <div className="mb-2 flex items-center justify-between px-1">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Case Queue
@@ -621,8 +624,12 @@ export function CaseDesk() {
           </section>
 
           <aside className="rounded-xl border border-border bg-surface-raised p-4 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto">
+            <div className="mb-3">
+              <FindingsBySourceCard />
+            </div>
             <AgentPipeline />
           </aside>
+
         </div>
       </main>
     </div>

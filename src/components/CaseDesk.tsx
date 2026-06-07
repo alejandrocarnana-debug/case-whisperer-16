@@ -1,9 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CASES, HEADER_STATS, AGENT_PIPELINE, type Case, type Severity } from "@/lib/cases-data";
-import fraudNetwork from "@/assets/fraud-network.jpg";
+import {
+  CASE_EXTRAS,
+  AGENT_RULES,
+  exhibitLabel,
+  type AuditEntry,
+  type CaseStatus,
+} from "@/lib/cases-extras";
 
 const formatExposure = (n: number) =>
   n >= 1000 ? `$${(n / 1000).toFixed(1)}K` : `$${n}`;
+
+const formatAmount = (n: number) =>
+  `$${n.toLocaleString("en-US")}`;
 
 const severityStyles: Record<Severity, string> = {
   CRITICAL: "bg-severity-critical-bg text-severity-critical",
@@ -17,6 +26,38 @@ const severityBar: Record<Severity, string> = {
   REVIEW: "bg-severity-review",
 };
 
+const statusStampColor: Record<CaseStatus, { fg: string; bg: string }> = {
+  "UNDER REVIEW": { fg: "var(--stamp-amber)", bg: "var(--stamp-amber-bg)" },
+  FROZEN: { fg: "var(--stamp-red)", bg: "var(--stamp-red-bg)" },
+  CLEARED: { fg: "var(--stamp-green)", bg: "var(--stamp-green-bg)" },
+  ESCALATED: { fg: "var(--stamp-blue)", bg: "var(--stamp-blue-bg)" },
+};
+
+function Mono({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <span className={`num ${className}`}>{children}</span>;
+}
+
+function StatusStamp({ status, size = "md" }: { status: CaseStatus; size?: "sm" | "md" }) {
+  const c = statusStampColor[status];
+  const dims =
+    size === "sm"
+      ? "px-2 py-0.5 text-[9.5px] tracking-[0.18em]"
+      : "px-2.5 py-1 text-[11px] tracking-[0.2em]";
+  return (
+    <span
+      className={`inline-flex select-none items-center rounded-sm border border-dashed font-semibold uppercase ${dims}`}
+      style={{
+        color: c.fg,
+        backgroundColor: c.bg,
+        borderColor: c.fg,
+        transform: "rotate(-2deg)",
+      }}
+    >
+      {status}
+    </span>
+  );
+}
+
 function SeverityBadge({ s }: { s: Severity }) {
   return (
     <span
@@ -27,12 +68,30 @@ function SeverityBadge({ s }: { s: Severity }) {
   );
 }
 
-function StatChip({ label }: { label: string }) {
+function StatChip({ value, label }: { value: string; label: string }) {
   return (
     <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-sm text-foreground">
       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-      {label}
+      <Mono className="font-semibold">{value}</Mono>
+      <span className="text-muted-foreground">{label}</span>
     </div>
+  );
+}
+
+function SlaChip({ hours }: { hours: number }) {
+  const urgent = hours < 24;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${
+        urgent
+          ? "border-severity-critical/30 bg-severity-critical-bg text-severity-critical"
+          : "border-border bg-secondary text-muted-foreground"
+      }`}
+    >
+      <span>⏱</span>
+      <Mono className="font-semibold">{hours}h</Mono>
+      <span>to regulatory deadline</span>
+    </span>
   );
 }
 
@@ -45,6 +104,7 @@ function CaseCard({
   active: boolean;
   onClick: () => void;
 }) {
+  const extras = CASE_EXTRAS[c.id];
   return (
     <button
       onClick={onClick}
@@ -55,19 +115,23 @@ function CaseCard({
       }`}
     >
       <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]}`} />
-      <div className="flex items-center justify-between gap-2 pl-2">
-        <SeverityBadge s={c.severity} />
-        <span className="font-mono text-xs text-muted-foreground">{c.account_id}</span>
+      <div className="flex items-start justify-between gap-2 pl-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <SeverityBadge s={c.severity} />
+          <Mono className="text-xs text-muted-foreground">{c.account_id}</Mono>
+        </div>
+        {extras && <StatusStamp status={extras.case_status} size="sm" />}
       </div>
       <div className="mt-2 flex items-baseline justify-between gap-2 pl-2">
-        <span className="text-lg font-semibold tabular-nums text-foreground">
-          {formatExposure(c.exposure)}
-        </span>
-        <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-          exposure
-        </span>
+        <Mono className="text-lg font-semibold text-foreground">{formatExposure(c.exposure)}</Mono>
+        <span className="text-[11px] uppercase tracking-wide text-muted-foreground">exposure</span>
       </div>
       <p className="mt-1.5 pl-2 text-sm leading-snug text-foreground/85">{c.reason}</p>
+      {extras && (
+        <div className="mt-2 pl-2">
+          <SlaChip hours={extras.sla_hours} />
+        </div>
+      )}
     </button>
   );
 }
@@ -77,54 +141,223 @@ function FraudBar({ prob, ci }: { prob: number; ci: [number, number] }) {
     <div>
       <div className="flex items-baseline justify-between text-sm">
         <span className="font-medium text-foreground">Fraud likelihood</span>
-        <span className="tabular-nums">
-          <span className="text-2xl font-semibold text-foreground">{prob}%</span>
+        <span>
+          <Mono className="text-2xl font-semibold text-foreground">{prob}%</Mono>
           <span className="ml-2 text-muted-foreground">
-            [{ci[0]}–{ci[1]}% confidence]
+            [<Mono>{ci[0]}–{ci[1]}%</Mono> confidence]
           </span>
         </span>
       </div>
       <div className="relative mt-2 h-2.5 w-full overflow-hidden rounded-full bg-secondary">
-        {/* confidence interval band */}
         <div
           className="absolute top-0 h-full bg-primary/15"
           style={{ left: `${ci[0]}%`, width: `${ci[1] - ci[0]}%` }}
         />
-        {/* point estimate */}
-        <div
-          className="absolute top-0 h-full bg-primary"
-          style={{ width: `${prob}%` }}
-        />
+        <div className="absolute top-0 h-full bg-primary" style={{ width: `${prob}%` }} />
       </div>
     </div>
   );
 }
 
+function RulesRow({ c }: { c: Case }) {
+  const extras = CASE_EXTRAS[c.id];
+  if (!extras) return null;
+  return (
+    <section>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Rules
+      </h3>
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Triggered:
+          </span>
+          {extras.triggered_rules.map((r) => (
+            <span
+              key={r}
+              className="inline-flex items-center rounded bg-severity-critical-bg px-2 py-0.5 text-xs font-semibold text-severity-critical"
+            >
+              <Mono>{r}</Mono>
+            </span>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Evaded:
+          </span>
+          {extras.evaded_rules.map((r) => (
+            <span
+              key={r.code}
+              className="inline-flex items-center gap-1.5 rounded border border-border bg-transparent px-2 py-0.5 text-xs text-foreground/80"
+            >
+              <Mono className="font-semibold">{r.code}</Mono>
+              {r.note && <span className="text-muted-foreground">({r.note})</span>}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function MoneyFlowTimeline({ c }: { c: Case }) {
+  const extras = CASE_EXTRAS[c.id];
+  if (!extras) return null;
+  const nodes = extras.flow;
+  return (
+    <section>
+      <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        Money Flow Timeline
+      </h3>
+      <div className="overflow-hidden rounded-lg border border-border bg-surface">
+        <div className="relative px-4 pb-12 pt-5">
+          <div className="flex items-center gap-1 overflow-x-auto pb-1">
+            {nodes.map((n, i) => (
+              <div key={i} className="flex shrink-0 items-center gap-1">
+                <div className="inline-flex items-center rounded-md border border-border bg-secondary px-2.5 py-1.5">
+                  <Mono className="text-xs font-semibold text-foreground">{n.account}</Mono>
+                </div>
+                {i < nodes.length - 1 && (
+                  <div className="flex shrink-0 flex-col items-center px-1 text-center">
+                    <Mono className="text-[11px] font-semibold leading-tight text-foreground">
+                      {nodes[i + 1].amount != null ? formatAmount(nodes[i + 1].amount!) : ""}
+                    </Mono>
+                    <span className="text-[10px] leading-tight text-muted-foreground">
+                      <Mono>{nodes[i + 1].date ?? ""}</Mono>
+                    </span>
+                    <span className="-mt-0.5 text-base leading-none text-muted-foreground">→</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Curved return path */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-6 right-6 bottom-3 h-8 rounded-b-[999px] border-x-2 border-b-2 border-severity-critical/50"
+          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-1 flex justify-center">
+            <span className="rounded-sm bg-surface px-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-severity-critical">
+              ↺ Circular Flow Detected
+            </span>
+          </div>
+        </div>
+        <div className="border-t border-border px-3 py-2 text-xs text-muted-foreground">
+          <Mono>{nodes.length}</Mono> hops · return-to-origin within{" "}
+          <Mono>{Math.max(1, nodes.length - 1) * 24}h</Mono> window
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AuditLog({
+  entries,
+  open,
+  onToggle,
+}: {
+  entries: AuditEntry[];
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <section className="rounded-lg border border-border bg-surface">
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Audit Log
+          </span>
+          <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">
+            <Mono>{entries.length}</Mono>
+          </span>
+        </div>
+        <span
+          className="text-xs text-muted-foreground transition-transform"
+          style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}
+        >
+          ▸
+        </span>
+      </button>
+      {open && (
+        <ol className="max-h-44 overflow-y-auto border-t border-border px-3 py-2">
+          {entries.map((e, i) => (
+            <li key={i} className="flex gap-3 py-1 text-xs leading-relaxed">
+              <Mono className="shrink-0 text-muted-foreground">{e.time}</Mono>
+              <span className="text-foreground/85">{e.text}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
+  );
+}
+
+const nowStamp = () => {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+};
+
 function CaseDetail({ c }: { c: Case }) {
+  const extras = CASE_EXTRAS[c.id];
+  const [audit, setAudit] = useState<AuditEntry[]>([]);
+  const [auditOpen, setAuditOpen] = useState(true);
+
+  // Reset audit log when switching cases.
+  useEffect(() => {
+    setAudit([...(extras?.audit_seed ?? [])].reverse());
+  }, [c.id, extras]);
+
+  const append = (text: string) =>
+    setAudit((prev) => [{ time: nowStamp(), text }, ...prev]);
+
+  const onApprove = () =>
+    append(
+      `Analyst approved ${c.recommended_action.toUpperCase()} on ${c.account_id} — reason: ${c.action_reason}`,
+    );
+  const onDismiss = () =>
+    append(`Analyst dismissed case on ${c.account_id} — no action taken`);
+  const onEscalate = () =>
+    append(`Analyst escalated ${c.account_id} to Tier-2 review`);
+  const onDownload = () =>
+    append(
+      `Analyst downloaded full case report for ${c.account_id} (PDF) — audit log included`,
+    );
+
   return (
     <div className="flex h-full flex-col gap-5 overflow-y-auto">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <SeverityBadge s={c.severity} />
-          <h2 className="font-mono text-xl font-semibold text-foreground">{c.account_id}</h2>
+          {extras && <StatusStamp status={extras.case_status} />}
+          <Mono className="text-xl font-semibold text-foreground">{c.account_id}</Mono>
           <span className="text-sm text-muted-foreground">·</span>
           <span className="text-sm text-foreground/80">{c.reason}</span>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-semibold tabular-nums">{formatExposure(c.exposure)}</div>
+          <Mono className="block text-2xl font-semibold">{formatExposure(c.exposure)}</Mono>
           <div className="text-[11px] uppercase tracking-wide text-muted-foreground">exposure</div>
         </div>
       </header>
 
+      <RulesRow c={c} />
+
       <section>
         <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Evidence
+          Exhibit List
         </h3>
         <ol className="space-y-2">
           {c.evidence.map((e, i) => (
-            <li key={i} className="flex gap-3 rounded-md border border-border bg-surface px-3 py-2.5 text-sm leading-relaxed">
-              <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-[11px] font-semibold text-foreground/70">
-                {i + 1}
+            <li
+              key={i}
+              className="flex gap-3 rounded-md border border-border bg-surface px-3 py-2.5 text-sm leading-relaxed"
+            >
+              <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                {exhibitLabel(i)}
               </span>
               <span className="text-foreground/90">{e}</span>
             </li>
@@ -136,49 +369,49 @@ function CaseDetail({ c }: { c: Case }) {
         </div>
       </section>
 
-      <section>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Fraud Ring Network
-        </h3>
-        <div className="overflow-hidden rounded-lg border border-border bg-surface">
-          <img
-            src={fraudNetwork}
-            alt="Network graph of accounts connected in fraud ring"
-            loading="lazy"
-            width={1024}
-            height={512}
-            className="h-44 w-full object-cover opacity-90"
-          />
-          <div className="border-t border-border px-3 py-2 text-xs text-muted-foreground">
-            Visualization placeholder · 5 accounts, 14 edges, cycle detected
-          </div>
-        </div>
-      </section>
+      <MoneyFlowTimeline c={c} />
 
       <section>
         <FraudBar prob={c.fraud_prob} ci={c.fraud_ci} />
       </section>
 
-      <section className="mt-auto">
+      <section>
         <p className="mb-2 text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">Recommended:</span>{" "}
           {c.recommended_action} — {c.action_reason}
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <button className="rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover">
+          <button
+            onClick={onApprove}
+            className="rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
+          >
             Approve Action
           </button>
-          <button className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+          <button
+            onClick={onDismiss}
+            className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
             Dismiss
           </button>
-          <button className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+          <button
+            onClick={onEscalate}
+            className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
             Escalate
           </button>
-          <button className="ml-auto rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent">
-            Download Report
-          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-[11px] text-muted-foreground">includes full audit log</span>
+            <button
+              onClick={onDownload}
+              className="rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            >
+              Download Report
+            </button>
+          </div>
         </div>
       </section>
+
+      <AuditLog entries={audit} open={auditOpen} onToggle={() => setAuditOpen((v) => !v)} />
     </div>
   );
 }
@@ -190,31 +423,37 @@ function AgentPipeline() {
         Agent Pipeline
       </h3>
       <ol className="space-y-3">
-        {AGENT_PIPELINE.map((a, i) => (
-          <li
-            key={a.name}
-            className="rounded-lg border border-border bg-surface p-3"
-          >
-            <div className="flex items-center gap-2">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
-              </span>
-              <span className="text-sm font-semibold text-foreground">
-                {i + 1}. {a.name}
-              </span>
-              <span className="ml-auto text-[11px] uppercase tracking-wide text-success">
-                done
-              </span>
-            </div>
-            <p className="mt-1.5 text-sm leading-snug text-foreground/85">
-              <span className="font-medium">{a.name}:</span> {a.summary}
-            </p>
-            <p className="mt-2 border-l-2 border-primary/40 bg-primary/5 px-2 py-1 text-xs italic leading-snug text-primary">
-              {a.recall}
-            </p>
-          </li>
-        ))}
+        {AGENT_PIPELINE.map((a, i) => {
+          const stats = AGENT_RULES[a.name];
+          return (
+            <li key={a.name} className="rounded-lg border border-border bg-surface p-3">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+                </span>
+                <span className="text-sm font-semibold text-foreground">
+                  <Mono>{i + 1}.</Mono> {a.name}
+                </span>
+                <span className="ml-auto text-[11px] uppercase tracking-wide text-success">
+                  done
+                </span>
+              </div>
+              <p className="mt-1.5 text-sm leading-snug text-foreground/85">
+                <span className="font-medium">{a.name}:</span> {a.summary}
+              </p>
+              {stats && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {a.name}: <Mono>{stats.rules_executed}</Mono> detection rules executed ·{" "}
+                  <Mono>{stats.findings}</Mono> findings
+                </p>
+              )}
+              <p className="mt-2 border-l-2 border-primary/40 bg-primary/5 px-2 py-1 text-xs italic leading-snug text-primary">
+                {a.recall}
+              </p>
+            </li>
+          );
+        })}
       </ol>
     </div>
   );
@@ -227,14 +466,13 @@ export function CaseDesk() {
         const rank = { CRITICAL: 0, HIGH: 1, REVIEW: 2 } as const;
         return rank[a.severity] - rank[b.severity] || b.exposure - a.exposure;
       }),
-    []
+    [],
   );
   const [selectedId, setSelectedId] = useState(sorted[0].id);
   const selected = sorted.find((c) => c.id === selectedId) ?? sorted[0];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* HEADER */}
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
@@ -246,16 +484,16 @@ export function CaseDesk() {
             <div>
               <h1 className="text-xl font-semibold leading-tight tracking-tight">CaseDesk</h1>
               <p className="text-xs leading-tight text-muted-foreground">
-                5,000 real bank transactions analyzed · findings verifiable against event benchmark
+                <Mono>5,000</Mono> real bank transactions analyzed · findings verifiable against event benchmark
               </p>
             </div>
           </div>
 
           <div className="ml-auto flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
-              <StatChip label={`${HEADER_STATS.flagged} cases flagged`} />
-              <StatChip label={`${HEADER_STATS.exposure} exposure`} />
-              <StatChip label={`${HEADER_STATS.ring_accounts} ring accounts`} />
+              <StatChip value={String(HEADER_STATS.flagged)} label="cases flagged" />
+              <StatChip value={HEADER_STATS.exposure} label="exposure" />
+              <StatChip value={String(HEADER_STATS.ring_accounts)} label="ring accounts" />
             </div>
             <button className="rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover">
               Run Analysis
@@ -264,10 +502,8 @@ export function CaseDesk() {
         </div>
       </header>
 
-      {/* MAIN */}
       <main className="mx-auto max-w-[1600px] px-6 py-5">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[30fr_45fr_25fr]">
-          {/* LEFT: queue */}
           <section className="flex flex-col rounded-xl border border-border bg-surface-raised p-3">
             <div className="mb-2 flex items-center justify-between px-1">
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -287,12 +523,10 @@ export function CaseDesk() {
             </div>
           </section>
 
-          {/* CENTER: detail */}
           <section className="rounded-xl border border-border bg-surface p-5 lg:max-h-[calc(100vh-130px)]">
             <CaseDetail c={selected} />
           </section>
 
-          {/* RIGHT: agent pipeline */}
           <aside className="rounded-xl border border-border bg-surface-raised p-4 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto">
             <AgentPipeline />
           </aside>

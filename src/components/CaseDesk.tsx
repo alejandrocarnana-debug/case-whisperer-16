@@ -164,10 +164,9 @@ function SeverityBadge({ s }: { s: Severity }) {
 
 function StatChip({ value, label }: { value: string; label: string }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-sm text-foreground">
-      <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-      <Mono className="font-semibold">{value}</Mono>
-      <span className="text-muted-foreground">{label}</span>
+    <div className="flex flex-col rounded-2xl border border-border bg-surface px-4 py-2.5 shadow-sm transition-all duration-200">
+      <Mono className="text-3xl font-bold tracking-tight text-foreground leading-none">{value}</Mono>
+      <span className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">{label}</span>
     </div>
   );
 }
@@ -176,7 +175,7 @@ function SlaChip({ hours }: { hours: number }) {
   const urgent = hours < 24;
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${
+      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] transition-all duration-200 ${
         urgent
           ? "border-severity-critical/30 bg-severity-critical-bg text-severity-critical"
           : "border-border bg-secondary text-muted-foreground"
@@ -188,6 +187,7 @@ function SlaChip({ hours }: { hours: number }) {
     </span>
   );
 }
+
 
 function CaseCard({
   c,

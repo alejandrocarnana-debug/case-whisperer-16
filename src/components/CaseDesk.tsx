@@ -374,49 +374,19 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
   );
 }
 
-function AuditLog({
-  entries,
-  open,
-  onToggle,
-}: {
-  entries: AuditEntry[];
-  open: boolean;
-  onToggle: () => void;
-}) {
+function AuditLogList({ entries }: { entries: AuditEntry[] }) {
   return (
-    <section className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
-      <button
-        onClick={onToggle}
-        className="flex w-full items-center justify-between gap-2 rounded-full px-3 py-2 text-left transition-all duration-200"
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Audit Log
-          </span>
-          <span className="inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">
-            <Mono>{entries.length}</Mono>
-          </span>
-        </div>
-        <span
-          className="text-xs text-muted-foreground transition-transform"
-          style={{ transform: open ? "rotate(90deg)" : "rotate(0deg)" }}
-        >
-          ▸
-        </span>
-      </button>
-      {open && (
-        <ol className="max-h-44 overflow-y-auto border-t border-border px-3 py-2">
-          {entries.map((e, i) => (
-            <li key={i} className="flex gap-3 py-1 text-xs leading-relaxed">
-              <Mono className="shrink-0 text-muted-foreground">{e.time}</Mono>
-              <span className="text-foreground/85">{e.text}</span>
-            </li>
-          ))}
-        </ol>
-      )}
-    </section>
+    <ol className="max-h-[60vh] overflow-y-auto">
+      {entries.map((e, i) => (
+        <li key={i} className="flex gap-3 py-1 text-xs leading-relaxed">
+          <Mono className="shrink-0 text-muted-foreground">{e.time}</Mono>
+          <span className="text-foreground/85">{e.text}</span>
+        </li>
+      ))}
+    </ol>
   );
 }
+
 
 
 const nowStamp = () => {

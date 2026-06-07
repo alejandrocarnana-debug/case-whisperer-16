@@ -234,12 +234,22 @@ function SeverityBadge({ s }: { s: Severity }) {
 
 function StatChip({ value, label }: { value: string; label: string }) {
   return (
-    <div className="flex flex-col rounded-2xl border border-border bg-surface px-4 py-2.5 shadow-sm transition-all duration-200">
+    <div className="flex flex-col rounded-3xl border border-border bg-surface px-4 py-2.5 shadow-sm transition-all duration-200">
       <Mono className="text-3xl font-bold tracking-tight text-foreground leading-none">{value}</Mono>
       <span className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">{label}</span>
     </div>
   );
 }
+
+function HeaderStatChip({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="flex flex-col px-3 leading-none">
+      <Mono className="text-2xl font-bold tracking-tight text-white leading-none">{value}</Mono>
+      <span className="mt-1 text-[11px] uppercase tracking-wider text-white/60">{label}</span>
+    </div>
+  );
+}
+
 
 function SlaChip({ hours }: { hours: number }) {
   const urgent = hours < 24;

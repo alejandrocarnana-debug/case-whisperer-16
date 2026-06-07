@@ -421,34 +421,56 @@ function CaseDetail({ c }: { c: Case }) {
   const extras = CASE_EXTRAS[c.id];
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [auditOpen, setAuditOpen] = useState(true);
+  const [caseStatus, setCaseStatus] = useState<CaseStatus | undefined>(extras?.case_status);
 
-  // Reset audit log when switching cases.
+  // Reset audit log + status when switching cases.
   useEffect(() => {
     setAudit([...(extras?.audit_seed ?? [])].reverse());
+    setCaseStatus(extras?.case_status);
   }, [c.id, extras]);
 
   const append = (text: string) =>
     setAudit((prev) => [{ time: nowStamp(), text }, ...prev]);
 
-  const onApprove = () =>
+  const onEscalate = () => {
+    setCaseStatus("ESCALATED");
     append(
-      `Analyst approved ${c.recommended_action.toUpperCase()} on ${c.account_id} — reason: ${c.action_reason}`,
+      `Analyst escalated ${c.account_id} — recommendation: ${c.recommended_action}`,
     );
-  const onDismiss = () =>
-    append(`Analyst dismissed case on ${c.account_id} — no action taken`);
-  const onEscalate = () =>
-    append(`Analyst escalated ${c.account_id} to Tier-2 review`);
+  };
+  const onFlag = () => {
+    setCaseStatus("UNDER REVIEW");
+    append(`Analyst flagged ${c.account_id} for review — ${c.action_reason}`);
+  };
+  const onDismiss = () => {
+    setCaseStatus("CLEARED");
+    append(`Analyst dismissed ${c.account_id} — no action taken`);
+  };
   const onDownload = () =>
     append(
       `Analyst downloaded full case report for ${c.account_id} (PDF) — audit log included`,
     );
 
+  const recKey = recommendedKey(c.recommended_action);
+  const rec = (k: RecKey) =>
+    recKey === k ? "ring-2 ring-primary/40" : "";
+
   return (
     <div className="flex h-full flex-col gap-5 overflow-y-auto">
+      <section className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <Mono className={`text-5xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
+          RISK {c.fraud_prob}
+        </Mono>
+        <span className="text-xl text-muted-foreground">/100</span>
+        <div className="basis-full text-sm text-muted-foreground">
+          <Mono>{c.fraud_ci[0]}–{c.fraud_ci[1]}%</Mono> confidence
+        </div>
+      </section>
+
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
         <div className="flex flex-wrap items-center gap-3">
           <SeverityBadge s={c.severity} />
-          {extras && <StatusStamp status={extras.case_status} />}
+          {caseStatus && <StatusStamp status={caseStatus} />}
           <Mono className="text-xl font-semibold text-foreground">{c.account_id}</Mono>
           <span className="text-sm text-muted-foreground">·</span>
           <span className="text-sm text-foreground/80">{c.reason}</span>
@@ -498,23 +520,24 @@ function CaseDetail({ c }: { c: Case }) {
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={onApprove}
-            className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md"
-          >
-            Approve Action
-          </button>
-          <button
-            onClick={onDismiss}
-            className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
-          >
-            Dismiss
-          </button>
-          <button
             onClick={onEscalate}
-            className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
+            className={`rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md ${rec("escalate")}`}
           >
             Escalate
           </button>
+          <button
+            onClick={onFlag}
+            className={`rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md ${rec("flag")}`}
+          >
+            Flag for Review
+          </button>
+          <button
+            onClick={onDismiss}
+            className={`rounded-full px-5 py-2.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-accent hover:text-foreground ${rec("dismiss")}`}
+          >
+            Dismiss
+          </button>
+
           <div className="ml-auto flex items-center gap-2">
             <span className="text-[11px] text-muted-foreground">includes full audit log</span>
             <button

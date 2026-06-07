@@ -358,10 +358,10 @@ function AuditLog({
   onToggle: () => void;
 }) {
   return (
-    <section className="rounded-lg border border-border bg-surface">
+    <section className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
       <button
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
+        className="flex w-full items-center justify-between gap-2 rounded-full px-3 py-2 text-left transition-all duration-200"
       >
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -391,6 +391,7 @@ function AuditLog({
     </section>
   );
 }
+
 
 const nowStamp = () => {
   const d = new Date();

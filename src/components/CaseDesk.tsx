@@ -126,6 +126,18 @@ const statusStampColor: Record<CaseStatus, { fg: string; bg: string }> = {
   ESCALATED: { fg: "var(--stamp-blue)", bg: "var(--stamp-blue-bg)" },
 };
 
+const riskColor = (n: number) =>
+  n >= 80 ? "text-severity-critical" : n >= 50 ? "text-severity-high" : "text-severity-review";
+
+type RecKey = "escalate" | "flag" | "dismiss";
+const recommendedKey = (rec: string): RecKey => {
+  const r = rec.toLowerCase();
+  if (/(escalat|freeze|sar)/.test(r)) return "escalate";
+  if (/(flag|review|hold|block|suspend|step-up|reverse)/.test(r)) return "flag";
+  return "dismiss";
+};
+
+
 function Mono({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <span className={`num ${className}`}>{children}</span>;
 }

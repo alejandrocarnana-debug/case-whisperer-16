@@ -519,15 +519,18 @@ function CaseDetail({ c }: { c: Case }) {
       </section>
 
       {/* 2. Recommendation card — decision zone */}
-      <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
-        <p className="mb-4 text-sm text-foreground/85">
-          <span className="font-semibold text-foreground">Recommended: {recLabel[recKey]}</span>
+      <section className="rounded-3xl border border-border bg-[color:var(--color-blush)] p-6 text-ink shadow-sm transition-all duration-200">
+        <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Recommended next step
+        </p>
+        <p className="mb-4 text-sm text-ink/85">
+          <span className="font-semibold text-ink">{recLabel[recKey]}</span>
           <span className="text-muted-foreground"> — {c.action_reason}</span>
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onEscalate}
-            className={`rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md ${rec("escalate")}`}
+            className={`rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md ${rec("escalate")}`}
           >
             Escalate
           </button>
@@ -535,7 +538,7 @@ function CaseDetail({ c }: { c: Case }) {
             onClick={onFlag}
             className={`rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md ${rec("flag")}`}
           >
-            Flag for Review
+            Flag for review
           </button>
           <button
             onClick={onDismiss}
@@ -544,12 +547,12 @@ function CaseDetail({ c }: { c: Case }) {
             Dismiss
           </button>
           <div className="ml-auto flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground">includes full audit log</span>
+            <span className="text-[11px] text-muted-foreground">Report ready to download</span>
             <button
               onClick={onDownload}
               className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
             >
-              Download Report
+              Download report
             </button>
           </div>
         </div>
@@ -557,11 +560,12 @@ function CaseDetail({ c }: { c: Case }) {
 
       {/* 3. Tabs */}
       <Tabs defaultValue="evidence" className="w-full">
-        <TabsList>
-          <TabsTrigger value="evidence">Evidence</TabsTrigger>
-          <TabsTrigger value="flow">Money Flow</TabsTrigger>
-          <TabsTrigger value="audit">Audit Log</TabsTrigger>
+        <TabsList className="rounded-full bg-secondary p-1">
+          <TabsTrigger value="evidence" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Evidence</TabsTrigger>
+          <TabsTrigger value="flow" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Money flow</TabsTrigger>
+          <TabsTrigger value="audit" className="rounded-full px-4 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm">Audit log</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="evidence" className="flex flex-col gap-5 pt-4">
           <RulesRow c={c} />

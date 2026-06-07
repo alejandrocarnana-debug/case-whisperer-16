@@ -621,9 +621,10 @@ function AgentPipeline() {
                 className="flex w-full items-center gap-2 p-5 text-left"
               >
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                 </span>
+
                 <span className="text-sm font-semibold text-foreground">
                   <Mono>{i + 1}.</Mono> {a.name}
                 </span>

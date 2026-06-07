@@ -89,6 +89,61 @@ function SeverityBreakdownCard() {
   );
 }
 
+const SEVERITY_SEGMENTS: BreakdownSegment[] = [
+  { label: "Critical", count: 4, color: "var(--severity-critical)" },
+  { label: "High", count: 9, color: "var(--severity-high)" },
+  { label: "Review", count: 10, color: "var(--source-slate)" },
+];
+
+function SeverityBreakdownCollapsed() {
+  const total = SEVERITY_SEGMENTS.reduce((s, x) => s + x.count, 0);
+  const critical = SEVERITY_SEGMENTS[0].count;
+  return (
+    <Collapsible className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
+      <CollapsibleTrigger className="group flex w-full items-center gap-3 p-3 text-left">
+        <div className="flex h-2 flex-1 overflow-hidden rounded-full bg-secondary">
+          {SEVERITY_SEGMENTS.map((s) => (
+            <div
+              key={s.label}
+              style={{ width: `${(s.count / total) * 100}%`, backgroundColor: s.color }}
+              className="h-full"
+            />
+          ))}
+        </div>
+        <span className="shrink-0 text-xs text-muted-foreground">
+          <Mono className="font-semibold text-foreground">{total}</Mono> findings ·{" "}
+          <Mono className="font-semibold text-foreground">{critical}</Mono> critical
+        </span>
+        <span className="shrink-0 text-xs text-muted-foreground transition-transform group-data-[state=open]:rotate-90">
+          ▸
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-3 pb-3">
+        <ul className="space-y-1">
+          {SEVERITY_SEGMENTS.map((s) => {
+            const pct = ((s.count / total) * 100).toFixed(1);
+            return (
+              <li key={s.label} className="flex items-center gap-2 text-xs">
+                <span
+                  className="inline-block h-3 w-[3px] rounded-sm"
+                  style={{ backgroundColor: s.color }}
+                />
+                <span className="num font-semibold text-foreground tabular-nums">{pct}%</span>
+                <span className="ml-auto text-muted-foreground">
+                  <span className="num font-semibold text-foreground">{s.count}</span>
+                  <span className="mx-1">·</span>
+                  {s.label}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+
 function FindingsBySourceCard() {
   return (
     <BreakdownCard

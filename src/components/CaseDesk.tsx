@@ -305,7 +305,7 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         Money Flow Timeline
       </h3>
-      <div className="overflow-hidden rounded-lg border border-border bg-surface">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
         <div className="relative px-4 pb-12 pt-5">
           <div className="flex items-center gap-1 overflow-x-auto pb-1">
             {nodes.map((n, i) => (

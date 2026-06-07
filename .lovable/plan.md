@@ -1,83 +1,114 @@
-# CaseDesk Final Brand Pass — Styling Only
+# Filum Visual Pass — Institutional Fraud-Ops Look
 
-Scope: token + className edits in `src/styles.css` and `src/components/CaseDesk.tsx`. No layout, structure, data, content semantics, or behavior changes.
+Styling only. No layout, structure, data, behavior, file/function renames.
 
-## 1. Tokens — `src/styles.css`
+## 1. Fonts — `src/routes/__root.tsx`
 
-Update `:root` values (everything else in the theme block stays):
-- `--background` → warm off-white `oklch` matching `#FAF7F2`
-- `--border` → warm `oklch` matching `#EBE7E0`
-- `--foreground` → `#0E0E0F`
-- `--muted-foreground` → warm gray `#5A5A5F`
-- `--primary` / `--ring` → `#494FDF` (already cobalt-violet; nudge if off)
-- Add new tokens:
-  - `--ink: #0E0E0F`
-  - `--header-bg: #0F1115`
-  - `--blush: #FFF1F4` (Klarna recommendation tint)
-- Map in `@theme inline`: `--color-ink`, `--color-header-bg`, `--color-blush`.
-- Add small utilities/keyframes:
-  - `.pulse-primary` — soft pulse animation in `var(--color-primary)` for active agent dots while pipeline runs (replaces ping-on-success styling target only where pipeline is "running"; existing JSX uses success — keep, just add the utility so future use lands).
-  - Keep existing `animate-bar-grow`.
+Add Google Fonts `<link>`s for: Inter (400/500/600/650), IBM Plex Mono (500), Space Grotesk (600). Remove any other display font links currently loaded.
 
-No layout-affecting CSS.
+## 2. Tokens — `src/styles.css`
 
-## 2. Header band — `CaseDesk.tsx` header (~lines 661–688)
+Replace `:root` color/radius/font tokens (keep variable names so components keep working):
 
-- `<header>`: background `bg-[color:var(--color-header-bg)]` (near-black `#0F1115`), full-width, white text. Remove `border-b border-border bg-surface`.
-- Add a 2px bottom gradient line: an absolutely-positioned `div` inside the header `bg-gradient-to-r from-primary to-transparent h-[2px]` at the very bottom — the only gradient.
-- CASE/DESK wordmark: white text, with the `/` glyph wrapped in `<span className="text-primary">/</span>`.
-- Stat numerals: `text-white font-bold tracking-tight` oversized (e.g. `text-2xl`), labels in `text-white/60 uppercase tracking-wider text-[11px]`.
-- Run Analysis button: keep current pill but ensure it is the single loudest element — `bg-primary text-white font-bold` solid pill, slightly larger shadow.
+- `--radius: 0.5rem` (8px)
+- `--background: #FAFAF8`
+- `--surface / --surface-raised / --card / --popover: #FFFFFF`
+- `--foreground / --card-foreground / --popover-foreground / --ink: #16181D`
+- `--muted-foreground: #5B6472`
+- `--border / --input: #E5E3DD`
+- `--primary: #1E3A5F`, `--primary-hover: #16294A`, `--primary-foreground: #FFFFFF`, `--ring: #1E3A5F`
+- `--secondary: #F4F6F9`, `--secondary-foreground: #16181D`
+- `--muted: #EEEFF1`, `--accent: #F4F6F9`
+- `--destructive: #C8503C` (thread red)
+- `--header-bg: #FFFFFF` (header becomes the same calm surface, not the dark band)
+- Remove `--blush`; reuse for severity backgrounds via new tokens below
+- Severity tokens:
+  - `--severity-critical: #C8503C`, `--severity-critical-bg: #FBEAE6`
+  - `--severity-high: #B07D2B`, `--severity-high-bg: #F8F0DF`
+  - `--severity-review: #5B6472`, `--severity-review-bg: #EEEFF1`
+- `--success: #2F7D5B`
+- `--rule-bg: #FCF8EF`, `--rule-border: #B07D2B`
+- Stamps: align to new palette (`stamp-red: #C8503C/#FBEAE6`, `stamp-amber: #B07D2B/#F8F0DF`, `stamp-green: #2F7D5B/#EAF3EE`, `stamp-blue: #1E3A5F/#EEF2F7`)
+- `--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif`
+- `--font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace`
+- Add `--font-display: "Space Grotesk", "Inter", sans-serif` (wordmark only)
+- Map `--color-display` in `@theme inline`
 
-## 3. Canvas + cards
+Shadow: add `--shadow-card: 0 1px 2px rgba(0,0,0,0.04)`; map and use everywhere shadow is currently `shadow-sm`/`shadow-md`. Remove all gradients, `backdrop-blur`, larger shadows.
 
-- Body canvas already driven by `--background` (now warm off-white).
-- All card surfaces (`bg-surface` / `bg-surface-raised`) stay pure white.
-- Bump card radius from `rounded-2xl` → `rounded-3xl` globally inside `CaseDesk.tsx` (queue card, case detail sections, agent rail, severity breakdown, exhibits, stat chips). 1px `border-border` (now warm `#EBE7E0`) + `shadow-sm`.
-- Card padding raised to `p-6` where currently `p-3/p-4/p-5` on the three zone shells and queue card (queue card already `p-6`).
+Base styles: `body { font-size: 15px; line-height: 1.5; }`; headings 1.25. Tabular-nums on `.num` stays.
 
-## 4. Pill geometry
+## 3. CaseDesk.tsx — sweep, no structural change
 
-- Buttons / chips / badges / tabs all `rounded-full`.
-- `StatusStamp`: keep slight rotation, switch from current dashed rounded-full (already round) — confirm pill radius and dashed border preserved.
-- `SeverityBadge`, `SlaChip`, rule chips, tab triggers, Download Report, Escalate/Flag/Dismiss, Run Analysis — all pill.
-- `TabsList`/`TabsTrigger`: ensure pill styling via shadcn override classes inline (`rounded-full`, active state `bg-primary text-primary-foreground`).
+### Header (~661–688)
+- Background `bg-white`, bottom `border-b border-border`. Remove the dark band, the gradient line, all white-on-dark utilities.
+- Logo block: small SVG ring icon (12 navy dots on a #C8503C circle outline with a short #C8503C lead line) + wordmark `Filum` in `font-display text-[20px] font-semibold text-ink` with a 2px #C8503C bottom border **under the word only** (inline-block + `border-b-2 border-[#C8503C]`). Tagline beside: `Pull the thread.` 13px `text-muted-foreground`.
+- Second line under wordmark row: 13px muted: "5,000 real bank transactions · one hidden fraud ring · findings verifiable against the event's answer key".
+- Stat chips: white cards, 1px border, 8px radius, padding 16/20px. Value: mono 20px/600 ink. Label: 11px uppercase 0.06em tracking, muted.
+- Run Analysis button: `bg-primary text-white rounded-md` (6px), 13px 600, hover `bg-[#16294A]`. No pill.
 
-## 5. Recommendation card (Klarna moment)
+### Global className sweep
+- Replace every `rounded-2xl`/`rounded-3xl`/`rounded-full` on cards/buttons/inputs with `rounded-md` (8px). Keep `rounded-full` ONLY on status dots and the small severity pills.
+- Replace `shadow-md`/`shadow-lg` with `shadow-[0_1px_2px_rgba(0,0,0,0.04)]`.
+- Remove all `bg-gradient-*`, `backdrop-blur*`, `before:` colored left edges of 3px+ except the queue selected state.
 
-In `CaseDetail` section "2. Recommendation" (~line 511):
-- Change container from `border-primary/20 bg-primary/5` → `border-[color:var(--color-border)] bg-[color:var(--color-blush)] text-ink`.
-- Heading: "Recommended next step" (sentence case), then `{recLabel[recKey]}` bold.
-- Action buttons remain — Escalate stays solid primary, Flag outline white, Dismiss ghost. The recommended one keeps its ring.
+### Typography sweep
+- Page title (only one) → `text-[28px] font-[650] tracking-[-0.02em]`.
+- Pane headings (Case Detail / Agent Pipeline / Queue) → `text-[20px] font-semibold tracking-[-0.01em]`.
+- Card titles / case names → `text-base font-semibold` (16/600).
+- Body / evidence → `text-[15px]`.
+- Metadata / timestamps → `text-[13px] font-medium text-muted-foreground`.
+- Uppercase labels → `text-[11px] uppercase tracking-[0.06em] font-medium text-muted-foreground`.
+- All numerals (risk score, exposures, confidence, percentages, account IDs, txn IDs, dates) → wrap in `font-mono font-medium` (`num` class already does tabular). Right-align currency cells.
+- Risk score hero: `text-5xl font-mono font-medium tracking-tight` colored by severity (red/amber/slate per existing thresholds remapped to new severity colors).
+- Remove every italic except agent "⟲ Recalled from memory:" line.
 
-## 6. Selected case left edge
+### Buttons
+- Primary (Approve Action, Run Analysis, Escalate): `bg-primary text-white rounded-md` 13px 600.
+- All others: `bg-white border border-border text-ink rounded-md hover:bg-secondary`.
 
-- `CaseCard` selected state (`isSelected`): add a 3px left edge `before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-primary before:rounded-l-3xl` (replacing whatever current selected indicator is — pure styling swap).
+### Severity badges
+- `text-[11px] uppercase tracking-[0.04em] font-medium px-2 py-0.5 rounded-full`
+- CRITICAL → `text-[#C8503C] bg-[#FBEAE6]`
+- HIGH → `text-[#B07D2B] bg-[#F8F0DF]`
+- REVIEW → `text-[#5B6472] bg-[#EEEFF1]`
 
-## 7. Typography
+### Queue cards
+- White, 1px border, 8px radius, padding 20px, 12px gap.
+- Severity pill top-left, account ID mono top-right.
+- Exposure: mono 16px/600 ink.
+- Reason: 13px muted, one line.
+- Selected: `border-l-2 border-l-primary bg-[#F4F6F9]` (replaces the 3px primary edge / pill bg).
 
-- Risk score stays `text-5xl font-bold font-mono tracking-tight`.
-- Header stat numerals + dollar exposure values: `font-bold tracking-tight`, monospace (`num`) where already applied; bump exposure in queue card to `text-2xl` if not already.
-- Section labels: small uppercase wide-tracking in `text-muted-foreground` (warm gray now via token).
-- Microcopy rewrites (sentence case):
-  - "Recommended:" → "Recommended next step"
-  - Empty state "No cases" → "All caught up"
-  - Download Report tooltip/label area → "Report ready to download" where the label currently reads "Download Report" keep button text as-is per "don't change content"... 
-  - Tab labels: "Evidence", "Money Flow", "Audit Log" → "Evidence", "Money flow", "Audit log".
-  - These are tab labels/section labels — visual casing only, no semantic change.
+### Case detail evidence rows
+- Replace boxed evidence rows with vertical stack separated by `border-b border-border` hairlines, 16px vertical padding. Remove individual card borders inside.
+- "Evaded rule:" row: `border-l-[3px] border-l-[#B07D2B] bg-[#FCF8EF] pl-3 py-2 rounded-r-md`.
 
-## 8. Motion discipline
+### Recommendation card
+- White surface, 1px border, 8px radius, 20px padding. Remove blush tint. Heading 11px uppercase label + 16/600 recommendation text.
 
-- Ensure every card / button / tab carries `transition-all duration-200 ease-out` (most already do).
-- Cards: hover lift `hover:-translate-y-px hover:shadow-md` (queue card already has).
-- Agent status dots: while pipeline running, dot uses `animate-ping`/pulse in `bg-primary` instead of success green. (Same JSX — swap class on the running-state branch only; behavior unchanged.)
-- Remove any other transitions/animations beyond these (audit log etc. — leave existing none).
+### Agent pipeline cards
+- White, 1px border, 8px radius, 20px padding.
+- Agent name as 11px uppercase label; summary 15px ink.
+- Status dot 8px round; running uses `#1E3A5F` pulse, success `#2F7D5B`, no other colors.
+- Recalled line: `italic text-[13px] text-muted-foreground bg-[#F7F7F5] rounded-md px-3 py-2`.
 
-## 9. Files touched
+### Fraud-likelihood bar
+- Track 6px `bg-border rounded-full`, fill `bg-primary rounded-full`. Value beside: `font-mono` `87% [79–93%]`.
 
-- `src/styles.css` — token values + new `--header-bg`, `--blush`, mappings.
-- `src/components/CaseDesk.tsx` — className swaps on header, cards, recommendation card, selected edge, tabs, microcopy casing.
+### Tabs
+- `TabsList`: `bg-secondary rounded-md p-0.5`. `TabsTrigger`: `rounded-sm px-3 py-1 text-[13px]`, active `bg-white text-ink shadow-[0_1px_2px_rgba(0,0,0,0.04)]`. No pill.
 
-## Out of scope (do not touch)
+### Misc
+- StatusStamp: keep stamped feel but switch to new palette, remove rotation if it reads "playful"; keep dashed border + uppercase 11px.
+- SLA chip: 11px uppercase pill, severity colors per above.
+- Audit log rows: hairline-separated, mono timestamps.
+- Modals / report preview / empty states: same surface/border/radius/shadow rules, Inter throughout, primary button style.
 
-Layout grid, three-zone structure, Tabs sub-structure, queue card content, agent feed content, exhibits, SLA chips, money flow timeline, audit log, stat breakdown cards, action button set/handlers, Run Analysis behavior, Download Report behavior.
+## 4. Out of scope
+Layout grid, three-zone structure, tabs sub-structure, queue contents, agent feed content, exhibits, money-flow timeline, audit log content, action handlers, Run Analysis behavior, Download Report behavior, file/function renames.
+
+## Files touched
+- `src/styles.css`
+- `src/routes/__root.tsx` (font links)
+- `src/components/CaseDesk.tsx` (className + small inline SVG logo swap)

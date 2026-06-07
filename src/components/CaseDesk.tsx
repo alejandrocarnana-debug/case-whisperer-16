@@ -395,10 +395,15 @@ const nowStamp = () => {
   return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
+const recLabel: Record<RecKey, string> = {
+  escalate: "Escalate",
+  flag: "Flag for Review",
+  dismiss: "Dismiss",
+};
+
 function CaseDetail({ c }: { c: Case }) {
   const extras = CASE_EXTRAS[c.id];
   const [audit, setAudit] = useState<AuditEntry[]>([]);
-  const [auditOpen, setAuditOpen] = useState(true);
   const [caseStatus, setCaseStatus] = useState<CaseStatus | undefined>(extras?.case_status);
 
   // Reset audit log + status when switching cases.
@@ -412,9 +417,7 @@ function CaseDetail({ c }: { c: Case }) {
 
   const onEscalate = () => {
     setCaseStatus("ESCALATED");
-    append(
-      `Analyst escalated ${c.account_id} — recommendation: ${c.recommended_action}`,
-    );
+    append(`Analyst escalated ${c.account_id} — recommendation: ${c.recommended_action}`);
   };
   const onFlag = () => {
     setCaseStatus("UNDER REVIEW");
@@ -425,76 +428,35 @@ function CaseDetail({ c }: { c: Case }) {
     append(`Analyst dismissed ${c.account_id} — no action taken`);
   };
   const onDownload = () =>
-    append(
-      `Analyst downloaded full case report for ${c.account_id} (PDF) — audit log included`,
-    );
+    append(`Analyst downloaded full case report for ${c.account_id} (PDF) — audit log included`);
 
   const recKey = recommendedKey(c.recommended_action);
-  const rec = (k: RecKey) =>
-    recKey === k ? "ring-2 ring-primary/40" : "";
+  const rec = (k: RecKey) => (recKey === k ? "ring-2 ring-primary/40" : "");
 
   return (
-    <div className="flex h-full flex-col gap-5 overflow-y-auto">
-      <section className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <Mono className={`text-5xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
-          RISK {c.fraud_prob}
-        </Mono>
-        <span className="text-xl text-muted-foreground">/100</span>
-        <div className="basis-full text-sm text-muted-foreground">
+    <div className="flex h-full flex-col gap-6 overflow-y-auto">
+      {/* 1. Identity + Risk */}
+      <section className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Mono className="text-xl font-bold text-foreground">{c.account_id}</Mono>
+          {caseStatus && <StatusStamp status={caseStatus} />}
+        </div>
+        <div className="flex flex-wrap items-baseline gap-x-3">
+          <Mono className={`text-5xl font-bold leading-none ${riskColor(c.fraud_prob)}`}>
+            RISK {c.fraud_prob}
+          </Mono>
+          <span className="text-xl text-muted-foreground">/100</span>
+        </div>
+        <div className="text-sm text-muted-foreground">
           <Mono>{c.fraud_ci[0]}–{c.fraud_ci[1]}%</Mono> confidence
         </div>
       </section>
 
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <SeverityBadge s={c.severity} />
-          {caseStatus && <StatusStamp status={caseStatus} />}
-          <Mono className="text-xl font-semibold text-foreground">{c.account_id}</Mono>
-          <span className="text-sm text-muted-foreground">·</span>
-          <span className="text-sm text-foreground/80">{c.reason}</span>
-        </div>
-        <div className="text-right">
-          <Mono className="block text-2xl font-semibold">{formatExposure(c.exposure)}</Mono>
-          <div className="text-[11px] uppercase tracking-wide text-muted-foreground">exposure</div>
-        </div>
-      </header>
-
-      <RulesRow c={c} />
-
-      <section>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Exhibit List
-        </h3>
-        <ol className="space-y-2">
-          {c.evidence.map((e, i) => (
-            <li
-              key={i}
-              className="flex gap-3 rounded-2xl border border-border bg-surface px-3 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-200"
-            >
-              <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                {exhibitLabel(i)}
-              </span>
-              <span className="text-foreground/90">{e}</span>
-            </li>
-          ))}
-        </ol>
-        <div className="mt-3 rounded-2xl border-l-4 border-rule-border bg-rule-bg px-3 py-2 text-sm">
-          <span className="font-semibold text-foreground">Evaded rule:</span>{" "}
-          <span className="text-foreground/85">{c.evaded_rule}</span>
-        </div>
-
-      </section>
-
-      <MoneyFlowTimeline c={c} />
-
-      <section>
-        <FraudBar prob={c.fraud_prob} ci={c.fraud_ci} />
-      </section>
-
-      <section>
-        <p className="mb-2 text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">Recommended:</span>{" "}
-          {c.recommended_action} — {c.action_reason}
+      {/* 2. Recommendation card — decision zone */}
+      <section className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+        <p className="mb-4 text-sm text-foreground/85">
+          <span className="font-semibold text-foreground">Recommended: {recLabel[recKey]}</span>
+          <span className="text-muted-foreground"> — {c.action_reason}</span>
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -515,7 +477,6 @@ function CaseDetail({ c }: { c: Case }) {
           >
             Dismiss
           </button>
-
           <div className="ml-auto flex items-center gap-2">
             <span className="text-[11px] text-muted-foreground">includes full audit log</span>
             <button
@@ -526,13 +487,51 @@ function CaseDetail({ c }: { c: Case }) {
             </button>
           </div>
         </div>
-
       </section>
 
-      <AuditLog entries={audit} open={auditOpen} onToggle={() => setAuditOpen((v) => !v)} />
+      {/* 3. Tabs */}
+      <Tabs defaultValue="evidence" className="w-full">
+        <TabsList>
+          <TabsTrigger value="evidence">Evidence</TabsTrigger>
+          <TabsTrigger value="flow">Money Flow</TabsTrigger>
+          <TabsTrigger value="audit">Audit Log</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="evidence" className="flex flex-col gap-5 pt-4">
+          <RulesRow c={c} />
+          <section>
+            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Exhibit List
+            </h3>
+            <ol className="space-y-1">
+              {c.evidence.map((e, i) => (
+                <li key={i} className="flex gap-3 px-3 py-2.5 text-sm leading-relaxed">
+                  <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    {exhibitLabel(i)}
+                  </span>
+                  <span className="text-foreground/90">{e}</span>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-3 rounded-2xl border-l-4 border-rule-border bg-rule-bg px-3 py-2 text-sm">
+              <span className="font-semibold text-foreground">Evaded rule:</span>{" "}
+              <span className="text-foreground/85">{c.evaded_rule}</span>
+            </div>
+          </section>
+        </TabsContent>
+
+        <TabsContent value="flow" className="pt-4">
+          <MoneyFlowTimeline c={c} />
+        </TabsContent>
+
+        <TabsContent value="audit" className="pt-4">
+          <AuditLogList entries={audit} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
+
 
 function AgentPipeline() {
   return (

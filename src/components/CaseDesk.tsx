@@ -736,7 +736,7 @@ export function CaseDesk() {
             <CaseDetail c={selected} />
           </section>
 
-          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-3xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200">
+          <aside className="flex h-full min-h-0 flex-col overflow-y-auto rounded-3xl border border-border bg-surface-raised p-6 shadow-sm transition-all duration-200">
             <div className="mb-3 shrink-0">
               <FindingsBySourceCard />
             </div>

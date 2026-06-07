@@ -270,7 +270,7 @@ function RulesRow({ c }: { c: Case }) {
           {extras.triggered_rules.map((r) => (
             <span
               key={r}
-              className="inline-flex items-center rounded bg-severity-critical-bg px-2 py-0.5 text-xs font-semibold text-severity-critical"
+              className="inline-flex items-center rounded-full bg-severity-critical-bg px-2.5 py-0.5 text-xs font-semibold text-severity-critical transition-all duration-200"
             >
               <Mono>{r}</Mono>
             </span>
@@ -283,7 +283,7 @@ function RulesRow({ c }: { c: Case }) {
           {extras.evaded_rules.map((r) => (
             <span
               key={r.code}
-              className="inline-flex items-center gap-1.5 rounded border border-border bg-transparent px-2 py-0.5 text-xs text-foreground/80"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-transparent px-2.5 py-0.5 text-xs text-foreground/80 transition-all duration-200"
             >
               <Mono className="font-semibold">{r.code}</Mono>
               {r.note && <span className="text-muted-foreground">({r.note})</span>}
@@ -294,6 +294,7 @@ function RulesRow({ c }: { c: Case }) {
     </section>
   );
 }
+
 
 function MoneyFlowTimeline({ c }: { c: Case }) {
   const extras = CASE_EXTRAS[c.id];

@@ -26,7 +26,7 @@ function BreakdownCard({
 }) {
   const total = segments.reduce((s, x) => s + x.count, 0);
   return (
-    <Card className="rounded-lg border-border bg-surface shadow-none">
+    <Card className="rounded-2xl border-border bg-surface shadow-sm transition-all duration-200">
       <CardHeader className="space-y-1 p-3 pb-2">
         <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}

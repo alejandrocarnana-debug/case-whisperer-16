@@ -8,6 +8,9 @@ import {
   type CaseStatus,
 } from "@/lib/cases-extras";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+
 
 interface BreakdownSegment {
   label: string;

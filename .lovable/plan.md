@@ -1,39 +1,42 @@
-## Plan
+## Polish Pass — Revolut-inspired styling tokens
 
-### Goal
-Add two compact stat cards to the existing CaseDesk layout using the project's shadcn Card components. No layout changes, no new dependencies.
+Styling-only. No structure, content, data, or behavior changes. Two files touched: `src/styles.css` and `src/components/CaseDesk.tsx`.
 
----
+### 1. Tokens (`src/styles.css`)
+- `--background` → #FAFAFA off-white canvas
+- `--surface`, `--surface-raised`, `--card` → #FFFFFF
+- `--foreground` / `--card-foreground` → #0A0A0A ink
+- `--muted-foreground` → #525252
+- `--primary` / `--ring` / `--source-blue` → #494FDF cobalt-violet
+- `--primary-hover` → slightly darker cobalt-violet
+- `--border` / `--input` → #E5E5E5
+- `--radius` → 1.25rem (drives rounded-2xl ≈ 20px on cards)
+- Severity tokens left untouched (functional colors)
 
-### Card 1 — Severity Breakdown
-- **Placement:** Top of the left queue rail, above the case cards, inside the existing `section`.
-- **Data:** Total 23 cases. Segments: Critical 4, High 9, Review 10.
-- **Visual:**
-  - Thin horizontal composite progress bar (full width) split into three colored segments: red (critical), amber (high), slate (review).
-  - Below: three breakdown rows. Each row: small colored vertical tick, percentage in monospace bold, count and label right-aligned (e.g. "4 · Critical").
-  - Segments animate in with a brief width transition on load.
-- **Style:** Dossier styling — monospace numbers (`num` class), light theme, subtle border, no trend arrows.
+### 2. Shape & shadow updates in `CaseDesk.tsx`
+- Outer rail sections + detail pane: `rounded-2xl border-border shadow-sm`
+- Breakdown cards (`BreakdownCard`): `rounded-2xl shadow-sm`
+- `CaseCard`: `rounded-2xl shadow-sm`, p-5, `transition-all duration-200`, hover lifts (`hover:-translate-y-px hover:shadow-md`); when active, swap the left severity bar for a 2px cobalt-violet left border (`border-l-2 border-primary`) keeping the severity bar visible on inactive
+- Detail pane padding p-5 (already), confirm
+- Audit log, money flow timeline, exhibit list cards: same `rounded-2xl` / border / shadow-sm
+- All buttons (Run Analysis, Approve, Dismiss, Escalate, Download Report, AuditLog toggle): `rounded-full transition-all duration-200`
+- Chips/badges/pills: `SeverityBadge`, `SlaChip`, rule chips (Triggered / Evaded), agent "done" tag → `rounded-full`
+- `StatusStamp`: keep rotation + dashed border, change radius from `rounded-sm` to `rounded-full`
 
-### Card 2 — Findings by Source
-- **Placement:** Top of the right Agent Pipeline rail, above the Finder card, inside the existing `aside`.
-- **Data:** Total 23 findings. Segments: Circular flows 6, Structuring 11, Duplicate transactions 6.
-- **Visual:**
-  - Same composite bar + breakdown row pattern as Card 1.
-  - Segment colors: deep blue, teal, slate.
-  - Caption under title: "Detected by Finder across 3 rule sets".
-- **Style:** Same dossier styling.
+### 3. Typography — header stat chips
+Restructure each `StatChip` to a stacked display block:
+- Number: `text-3xl font-bold tracking-tight` (kept `num` monospace)
+- Label: small muted text beneath
+- Card-style container: white surface, `rounded-2xl border shadow-sm`, p-4
+- Layout still inline-flex side-by-side in the header; no grid changes
 
-### Implementation Details
-- Import `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` from `@/components/ui/card`.
-- Create two new local components inside `CaseDesk.tsx`:
-  - `SeverityBreakdownCard` — takes no props, derives counts from `CASES` array.
-  - `FindingsBySourceCard` — takes no props, uses hardcoded counts that sum to 23.
-- Add CSS keyframe/utility for the width animation in `src/styles.css` if needed (e.g. a simple `@keyframes bar-grow` + `animate-bar-grow` class).
-- Insert `SeverityBreakdownCard` inside the left `section` before the case queue list.
-- Insert `FindingsBySourceCard` inside the `aside` before the `AgentPipeline`.
-- Verify the header chip "23 cases flagged" remains unchanged and the totals in both cards equal 23.
+### 4. Case card typography
+- Exposure number: bump from `text-lg` → `text-xl`, keep `font-semibold` → `font-bold`
+- Keep monospace, keep IDs/amounts/timestamps in `num` exactly as is
 
-### Out of Scope
-- No changes to layout structure, grid columns, or column widths.
-- No changes to case cards, case detail pane, agent cards, action buttons, or Run Analysis.
-- No new npm packages.
+### 5. Spacing
+- Queue card gap: `gap-2` → `gap-3` (12px)
+- Card internal padding: `p-3.5` → `p-5` on `CaseCard`; rail containers stay as-is (only the cards themselves get the bump per "padding inside cards to p-5")
+
+### Out of scope (untouched)
+Three-zone grid, column widths, all text content, dossier components' structure, behavior, all data, agent feed structure, breakdown card data, severity colors, monospace styling, animations beyond the single `transition-all duration-200`.

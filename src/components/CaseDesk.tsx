@@ -26,7 +26,7 @@ function BreakdownCard({
 }) {
   const total = segments.reduce((s, x) => s + x.count, 0);
   return (
-    <Card className="rounded-lg border-border bg-surface shadow-none">
+    <Card className="rounded-2xl border-border bg-surface shadow-sm transition-all duration-200">
       <CardHeader className="space-y-1 p-3 pb-2">
         <CardTitle className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
@@ -138,7 +138,7 @@ function StatusStamp({ status, size = "md" }: { status: CaseStatus; size?: "sm" 
       : "px-2.5 py-1 text-[11px] tracking-[0.2em]";
   return (
     <span
-      className={`inline-flex select-none items-center rounded-sm border border-dashed font-semibold uppercase ${dims}`}
+      className={`inline-flex select-none items-center rounded-full border border-dashed font-semibold uppercase transition-all duration-200 ${dims}`}
       style={{
         color: c.fg,
         backgroundColor: c.bg,
@@ -154,19 +154,19 @@ function StatusStamp({ status, size = "md" }: { status: CaseStatus; size?: "sm" 
 function SeverityBadge({ s }: { s: Severity }) {
   return (
     <span
-      className={`inline-flex items-center rounded px-2 py-0.5 text-[11px] font-semibold tracking-wider ${severityStyles[s]}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wider transition-all duration-200 ${severityStyles[s]}`}
     >
       {s}
     </span>
   );
 }
 
+
 function StatChip({ value, label }: { value: string; label: string }) {
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-sm text-foreground">
-      <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-      <Mono className="font-semibold">{value}</Mono>
-      <span className="text-muted-foreground">{label}</span>
+    <div className="flex flex-col rounded-2xl border border-border bg-surface px-4 py-2.5 shadow-sm transition-all duration-200">
+      <Mono className="text-3xl font-bold tracking-tight text-foreground leading-none">{value}</Mono>
+      <span className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground">{label}</span>
     </div>
   );
 }
@@ -175,7 +175,7 @@ function SlaChip({ hours }: { hours: number }) {
   const urgent = hours < 24;
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${
+      className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] transition-all duration-200 ${
         urgent
           ? "border-severity-critical/30 bg-severity-critical-bg text-severity-critical"
           : "border-border bg-secondary text-muted-foreground"
@@ -187,6 +187,7 @@ function SlaChip({ hours }: { hours: number }) {
     </span>
   );
 }
+
 
 function CaseCard({
   c,
@@ -201,13 +202,13 @@ function CaseCard({
   return (
     <button
       onClick={onClick}
-      className={`relative w-full overflow-hidden rounded-lg border bg-surface p-3.5 text-left transition-colors ${
+      className={`relative w-full overflow-hidden rounded-2xl border bg-surface p-5 text-left shadow-sm transition-all duration-200 hover:-translate-y-px hover:shadow-md ${
         active
-          ? "border-primary ring-1 ring-primary/30 shadow-sm"
-          : "border-border hover:border-foreground/20 hover:bg-accent/40"
+          ? "border-l-2 border-l-primary border-border ring-1 ring-primary/20"
+          : "border-border hover:border-foreground/20"
       }`}
     >
-      <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]}`} />
+      <span className={`absolute left-0 top-0 h-full w-1 ${severityBar[c.severity]} ${active ? "opacity-0" : ""}`} />
       <div className="flex items-start justify-between gap-2 pl-2">
         <div className="flex flex-wrap items-center gap-2">
           <SeverityBadge s={c.severity} />
@@ -216,7 +217,7 @@ function CaseCard({
         {extras && <StatusStamp status={extras.case_status} size="sm" />}
       </div>
       <div className="mt-2 flex items-baseline justify-between gap-2 pl-2">
-        <Mono className="text-lg font-semibold text-foreground">{formatExposure(c.exposure)}</Mono>
+        <Mono className="text-xl font-bold text-foreground">{formatExposure(c.exposure)}</Mono>
         <span className="text-[11px] uppercase tracking-wide text-muted-foreground">exposure</span>
       </div>
       <p className="mt-1.5 pl-2 text-sm leading-snug text-foreground/85">{c.reason}</p>
@@ -228,6 +229,7 @@ function CaseCard({
     </button>
   );
 }
+
 
 function FraudBar({ prob, ci }: { prob: number; ci: [number, number] }) {
   return (
@@ -268,7 +270,7 @@ function RulesRow({ c }: { c: Case }) {
           {extras.triggered_rules.map((r) => (
             <span
               key={r}
-              className="inline-flex items-center rounded bg-severity-critical-bg px-2 py-0.5 text-xs font-semibold text-severity-critical"
+              className="inline-flex items-center rounded-full bg-severity-critical-bg px-2.5 py-0.5 text-xs font-semibold text-severity-critical transition-all duration-200"
             >
               <Mono>{r}</Mono>
             </span>
@@ -281,7 +283,7 @@ function RulesRow({ c }: { c: Case }) {
           {extras.evaded_rules.map((r) => (
             <span
               key={r.code}
-              className="inline-flex items-center gap-1.5 rounded border border-border bg-transparent px-2 py-0.5 text-xs text-foreground/80"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-transparent px-2.5 py-0.5 text-xs text-foreground/80 transition-all duration-200"
             >
               <Mono className="font-semibold">{r.code}</Mono>
               {r.note && <span className="text-muted-foreground">({r.note})</span>}
@@ -293,6 +295,7 @@ function RulesRow({ c }: { c: Case }) {
   );
 }
 
+
 function MoneyFlowTimeline({ c }: { c: Case }) {
   const extras = CASE_EXTRAS[c.id];
   if (!extras) return null;
@@ -302,7 +305,7 @@ function MoneyFlowTimeline({ c }: { c: Case }) {
       <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         Money Flow Timeline
       </h3>
-      <div className="overflow-hidden rounded-lg border border-border bg-surface">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
         <div className="relative px-4 pb-12 pt-5">
           <div className="flex items-center gap-1 overflow-x-auto pb-1">
             {nodes.map((n, i) => (
@@ -355,10 +358,10 @@ function AuditLog({
   onToggle: () => void;
 }) {
   return (
-    <section className="rounded-lg border border-border bg-surface">
+    <section className="rounded-2xl border border-border bg-surface shadow-sm transition-all duration-200">
       <button
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
+        className="flex w-full items-center justify-between gap-2 rounded-full px-3 py-2 text-left transition-all duration-200"
       >
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -388,6 +391,7 @@ function AuditLog({
     </section>
   );
 }
+
 
 const nowStamp = () => {
   const d = new Date();
@@ -447,7 +451,7 @@ function CaseDetail({ c }: { c: Case }) {
           {c.evidence.map((e, i) => (
             <li
               key={i}
-              className="flex gap-3 rounded-md border border-border bg-surface px-3 py-2.5 text-sm leading-relaxed"
+              className="flex gap-3 rounded-2xl border border-border bg-surface px-3 py-2.5 text-sm leading-relaxed shadow-sm transition-all duration-200"
             >
               <span className="shrink-0 pt-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 {exhibitLabel(i)}
@@ -456,10 +460,11 @@ function CaseDetail({ c }: { c: Case }) {
             </li>
           ))}
         </ol>
-        <div className="mt-3 rounded-md border-l-4 border-rule-border bg-rule-bg px-3 py-2 text-sm">
+        <div className="mt-3 rounded-2xl border-l-4 border-rule-border bg-rule-bg px-3 py-2 text-sm">
           <span className="font-semibold text-foreground">Evaded rule:</span>{" "}
           <span className="text-foreground/85">{c.evaded_rule}</span>
         </div>
+
       </section>
 
       <MoneyFlowTimeline c={c} />
@@ -476,19 +481,19 @@ function CaseDetail({ c }: { c: Case }) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onApprove}
-            className="rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover"
+            className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md"
           >
             Approve Action
           </button>
           <button
             onClick={onDismiss}
-            className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
           >
             Dismiss
           </button>
           <button
             onClick={onEscalate}
-            className="rounded-md border border-border bg-surface px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
           >
             Escalate
           </button>
@@ -496,12 +501,13 @@ function CaseDetail({ c }: { c: Case }) {
             <span className="text-[11px] text-muted-foreground">includes full audit log</span>
             <button
               onClick={onDownload}
-              className="rounded-md border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+              className="rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-all duration-200 hover:bg-accent hover:shadow-md"
             >
               Download Report
             </button>
           </div>
         </div>
+
       </section>
 
       <AuditLog entries={audit} open={auditOpen} onToggle={() => setAuditOpen((v) => !v)} />
@@ -519,7 +525,7 @@ function AgentPipeline() {
         {AGENT_PIPELINE.map((a, i) => {
           const stats = AGENT_RULES[a.name];
           return (
-            <li key={a.name} className="rounded-lg border border-border bg-surface p-3">
+            <li key={a.name} className="rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200">
               <div className="flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-60" />
@@ -528,10 +534,11 @@ function AgentPipeline() {
                 <span className="text-sm font-semibold text-foreground">
                   <Mono>{i + 1}.</Mono> {a.name}
                 </span>
-                <span className="ml-auto text-[11px] uppercase tracking-wide text-success">
+                <span className="ml-auto rounded-full bg-secondary px-2 py-0.5 text-[11px] uppercase tracking-wide text-success">
                   done
                 </span>
               </div>
+
               <p className="mt-1.5 text-sm leading-snug text-foreground/85">
                 <span className="font-medium">{a.name}:</span> {a.summary}
               </p>
@@ -569,7 +576,7 @@ export function CaseDesk() {
       <header className="border-b border-border bg-surface">
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm transition-all duration-200">
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth="2.2">
                 <path d="M3 4h18v4H3zM3 12h12v8H3zM18 12h3v8h-3z" strokeLinejoin="round" />
               </svg>
@@ -588,7 +595,7 @@ export function CaseDesk() {
               <StatChip value={HEADER_STATS.exposure} label="exposure" />
               <StatChip value={String(HEADER_STATS.ring_accounts)} label="ring accounts" />
             </div>
-            <button className="rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover">
+            <button className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary-hover hover:shadow-md">
               Run Analysis
             </button>
           </div>
@@ -597,7 +604,7 @@ export function CaseDesk() {
 
       <main className="mx-auto max-w-[1600px] px-6 py-5">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[30fr_45fr_25fr]">
-          <section className="flex flex-col rounded-xl border border-border bg-surface-raised p-3">
+          <section className="flex flex-col rounded-2xl border border-border bg-surface-raised p-3 shadow-sm transition-all duration-200">
             <div className="mb-2 px-1">
               <SeverityBreakdownCard />
             </div>
@@ -607,7 +614,7 @@ export function CaseDesk() {
               </h2>
               <span className="text-[11px] text-muted-foreground">worst first</span>
             </div>
-            <div className="flex max-h-[calc(100vh-180px)] flex-col gap-2 overflow-y-auto pr-1">
+            <div className="flex max-h-[calc(100vh-180px)] flex-col gap-3 overflow-y-auto pr-1">
               {sorted.map((c) => (
                 <CaseCard
                   key={c.id}
@@ -619,16 +626,18 @@ export function CaseDesk() {
             </div>
           </section>
 
-          <section className="rounded-xl border border-border bg-surface p-5 lg:max-h-[calc(100vh-130px)]">
+          <section className="rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200 lg:max-h-[calc(100vh-130px)]">
             <CaseDetail c={selected} />
           </section>
 
-          <aside className="rounded-xl border border-border bg-surface-raised p-4 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto">
+          <aside className="rounded-2xl border border-border bg-surface-raised p-4 shadow-sm transition-all duration-200 lg:max-h-[calc(100vh-130px)] lg:overflow-y-auto">
             <div className="mb-3">
               <FindingsBySourceCard />
             </div>
             <AgentPipeline />
           </aside>
+
+
 
         </div>
       </main>
